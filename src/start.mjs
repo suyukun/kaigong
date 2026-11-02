@@ -1,4 +1,4 @@
-// start.mjs — `specgate start`: the single entry. Read-only routing.
+// start.mjs — `kaigong start`: the single entry. Read-only routing.
 // Precheck (5 items) -> three questions (defaults from the precheck; enter
 // accepts) -> one exact next command in the fixed Route:/Next:/After: format
 // (onboarding.md section 1). start NEVER writes to disk — not a single byte.
@@ -12,10 +12,10 @@ import { UsageError, parseArgs, PKG_ROOT } from './util.mjs';
 
 const BOOL_FLAGS = ['help'];
 
-const HELP = `specgate start — the single entry: route your first run
+const HELP = `kaigong start — the single entry: route your first run
 
 Usage:
-  specgate start [dir] [options]
+  kaigong start [dir] [options]
 
 Read-only. start writes nothing — it prechecks the repository, asks three
 questions (defaults pre-filled from the precheck; enter accepts them), then
@@ -37,8 +37,8 @@ Options:
   --intent      <setup|fill|check>    Answer Q3 without asking
   -h, --help                          Show this help
 
-Routing: A greenfield -> specgate init --stage S0 · B existing repo -> specgate
-init --adopt · fill missing docs -> specgate init · check -> specgate check.
+Routing: A greenfield -> kaigong init --stage S0 · B existing repo -> kaigong
+init --adopt · fill missing docs -> kaigong init · check -> kaigong check.
 The rose-bootstrap skill is the optional deep-dive behind Routes A/B.
 Non-interactive runs (no TTY) accept the precheck defaults.`;
 
@@ -156,7 +156,7 @@ export async function runStart(argv) {
   argv = argv.map((a) => (a === '-h' ? '--help' : a));
   const { flags, positionals } = parseArgs(argv, BOOL_FLAGS);
   if (flags.help) { console.log(HELP); return 0; }
-  if (positionals.length > 1) throw new UsageError('unexpected extra argument: ' + positionals[1] + ' (usage: specgate start [dir] [options])');
+  if (positionals.length > 1) throw new UsageError('unexpected extra argument: ' + positionals[1] + ' (usage: kaigong start [dir] [options])');
   const dir = resolve(positionals[0] ?? '.');
   if (!existsSync(dir)) throw new UsageError('target directory not found: ' + dir);
   const dirArg = positionals[0];
@@ -168,7 +168,7 @@ export async function runStart(argv) {
     console.log('\u2717 ' + dirDisplay + ' [precondition] Not a git repository. Rollback needs version control.');
     console.log('  Wrong:   bootstrap in an un-initialized directory');
     console.log('  Correct: git init && git commit --allow-empty -m "chore: init"');
-    console.log('  Next:    ask the user, then: specgate start');
+    console.log('  Next:    ask the user, then: kaigong start');
     console.log('No files were changed.');
     return 1;
   }
@@ -197,7 +197,7 @@ export async function runStart(argv) {
   ];
 
   // ---- print the precheck + the three questions ----
-  console.log('specgate start — ' + dir + '  (read-only: nothing is written)');
+  console.log('kaigong start — ' + dir + '  (read-only: nothing is written)');
   console.log('');
   console.log('Precheck:');
   console.log('  git repository    : yes');
@@ -265,22 +265,22 @@ export async function runStart(argv) {
   let route, next, after;
   if (a3 === 'check') {
     route = 'check';
-    next = 'specgate check' + suffix;
+    next = 'kaigong check' + suffix;
     after = agents.stage
       ? '"PASS ' + name + ' (stage ' + agents.stage + ')" — or every finding with where/expected/fix; check never writes files'
       : 'findings with where/expected/fix (AGENTS.md missing is finding #1); check never writes files';
   } else if (a3 === 'fill') {
     route = 'B';
-    next = 'specgate init' + suffix + (a2 === 'solo' ? ' --owner me' : '') + '   # stage ' + agents.stage + ' read from your AGENTS.md; installs only what is missing (add-only)';
+    next = 'kaigong init' + suffix + (a2 === 'solo' ? ' --owner me' : '') + '   # stage ' + agents.stage + ' read from your AGENTS.md; installs only what is missing (add-only)';
     after = '"PASS ' + name + ' (stage ' + agents.stage + ')" — the missing docs (' + missingForStage.join(', ') + ') now exist; existing files untouched';
   } else if (a1 === 'greenfield') {
     route = 'A';
-    next = 'specgate init' + suffix + ' --stage S0' + (a2 === 'solo' ? ' --owner me' : '') + '   # one command: scaffolds AGENTS.md + the two S0 docs (add-only, ~1 minute)';
-    after = 'AGENTS.md at the root with <!-- stage: S0 --> and no {{placeholders}} — "specgate check' + suffix + '" prints "PASS ' + name + ' (stage S0)"';
+    next = 'kaigong init' + suffix + ' --stage S0' + (a2 === 'solo' ? ' --owner me' : '') + '   # one command: scaffolds AGENTS.md + the two S0 docs (add-only, ~1 minute)';
+    after = 'AGENTS.md at the root with <!-- stage: S0 --> and no {{placeholders}} — "kaigong check' + suffix + '" prints "PASS ' + name + ' (stage S0)"';
   } else {
     route = 'B';
-    next = 'specgate init --adopt' + suffix + (a2 === 'solo' ? ' --owner me' : '');
-    after = 'git status shows only new files (yours untouched) — "specgate check' + suffix + '" prints "PASS ' + name + ' (stage ' + (agents.stage ?? 'S0') + ')" or lists what waits for your ruling';
+    next = 'kaigong init --adopt' + suffix + (a2 === 'solo' ? ' --owner me' : '');
+    after = 'git status shows only new files (yours untouched) — "kaigong check' + suffix + '" prints "PASS ' + name + ' (stage ' + (agents.stage ?? 'S0') + ')" or lists what waits for your ruling';
   }
 
   console.log('');

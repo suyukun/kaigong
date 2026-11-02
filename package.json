@@ -1,11 +1,11 @@
 {
-  "name": "@smashupcn/specgate",
-  "version": "0.1.1",
-  "description": "Stage-aware governance for repositories AI agents work in: AGENTS.md scaffold, five-doc kit, and a stage check for CI. Plain markdown, zero config, fully offline.",
+  "name": "kaigong",
+  "version": "0.2.0",
+  "description": "kaigong (\u5f00\u5de5, kickoff) - stage-aware governance for repositories AI agents work in: AGENTS.md scaffold, gate-doc kickoff kit, and a stage check for CI. Plain markdown, zero config, fully offline.",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "specgate": "dist/cli.mjs"
+    "kaigong": "dist/cli.mjs"
   },
   "directories": {
     "test": "test"
@@ -32,22 +32,30 @@
     "test:claims": "node test/claims.mjs"
   },
   "keywords": [
+    "ai-agents",
+    "ai-coding-agent",
+    "claude-code",
+    "cursor",
+    "copilot",
     "agents",
     "governance",
+    "kickoff",
+    "\u5f00\u5de5",
     "AGENTS.md",
     "adr",
     "spec",
     "gate",
     "checklist",
-    "cli"
+    "cli",
+    "workflow"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/suyukun/specgate.git"
+    "url": "git+https://github.com/suyukun/kaigong.git"
   },
-  "homepage": "https://github.com/suyukun/specgate#readme",
+  "homepage": "https://github.com/suyukun/kaigong#readme",
   "bugs": {
-    "url": "https://github.com/suyukun/specgate/issues"
+    "url": "https://github.com/suyukun/kaigong/issues"
   },
   "author": "suyukun"
 }

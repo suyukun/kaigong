@@ -1,4 +1,4 @@
-// handoff.mjs — `specgate handoff`: minimal cross-session handoff routing.
+// handoff.mjs — `kaigong handoff`: minimal cross-session handoff routing.
 // No arguments: print the write/read routing + the handoff skeleton (the
 // three-part scope contract What / Not in this handoff / Out of scope, shape
 // taken from skills/rose-handoff/SKILL.md) and point at the full skill.
@@ -13,10 +13,10 @@ const BOOL_FLAGS = ['init', 'help'];
 
 const SKILL_PATH = join(PKG_ROOT, 'skills', 'rose-handoff', 'SKILL.md').split(sep).join('/');
 
-const HELP = `specgate handoff — cross-session handoff, written or read (rose-handoff)
+const HELP = `kaigong handoff — cross-session handoff, written or read (rose-handoff)
 
 Usage:
-  specgate handoff [dir] [options]
+  kaigong handoff [dir] [options]
 
 No arguments: prints the routing (write when a session ends, read when the
 next one starts), the handoff skeleton — the three-part scope contract
@@ -76,7 +76,7 @@ Continue: <the one sentence the next session should act on first — the most im
 - Archive files or hand work to a teammate
 - Auto-dispatch tasks from "next steps" — they wait for the owner
 
-<!-- created by specgate handoff --init; this file is yours to edit by hand -->
+<!-- created by kaigong handoff --init; this file is yours to edit by hand -->
 `;
 }
 
@@ -94,7 +94,7 @@ line here instead of listing a directory.
 
 Row format: | YYYY-MM-DD | [handoff-YYYY-MM-DD-<topic>.md](handoff-YYYY-MM-DD-<topic>.md) | <the one-sentence Continue line from that handoff> |
 
-<!-- created by specgate handoff --init; this file is yours to edit by hand -->
+<!-- created by kaigong handoff --init; this file is yours to edit by hand -->
 `;
 
 function projectDisplayName(dir) {
@@ -107,7 +107,7 @@ function projectDisplayName(dir) {
 }
 
 function printRoutingAndSkeleton() {
-  console.log('specgate handoff — cross-session handoff (routes to the rose-handoff skill)');
+  console.log('kaigong handoff — cross-session handoff (routes to the rose-handoff skill)');
   console.log('');
   console.log('Writing a handoff (a session ends or rotates) -> handoffs/handoff-YYYY-MM-DD-<topic>.md, dated today');
   console.log('Reading a handoff (a new session starts)    -> handoffs/INDEX.md first; or the newest handoff-*.md; then stop');
@@ -134,7 +134,7 @@ function printRoutingAndSkeleton() {
   console.log('date), update handoffs/INDEX.md with the newest on top, and read the file');
   console.log('back after writing it.');
   console.log('');
-  console.log('Skeleton file: specgate handoff --init  (prints the file, then creates it in handoffs/)');
+  console.log('Skeleton file: kaigong handoff --init  (prints the file, then creates it in handoffs/)');
   console.log('Full flows:    ' + SKILL_PATH);
 }
 
@@ -142,7 +142,7 @@ export async function runHandoff(argv) {
   argv = argv.map((a) => (a === '-h' ? '--help' : a));
   const { flags, positionals } = parseArgs(argv, BOOL_FLAGS);
   if (flags.help) { console.log(HELP); return 0; }
-  if (positionals.length > 1) throw new UsageError('unexpected extra argument: ' + positionals[1] + ' (usage: specgate handoff [dir] [options])');
+  if (positionals.length > 1) throw new UsageError('unexpected extra argument: ' + positionals[1] + ' (usage: kaigong handoff [dir] [options])');
   const dir = resolve(positionals[0] ?? '.');
   if (!existsSync(dir)) throw new UsageError('target directory not found: ' + dir);
 
@@ -171,7 +171,7 @@ export async function runHandoff(argv) {
   };
 
   // ask-first: print the exact file and content BEFORE anything is written.
-  console.log('specgate handoff --init — ' + dir);
+  console.log('kaigong handoff --init — ' + dir);
   console.log('');
   if (existsSync(abs)) {
     console.log('Already exist — NOT touched (handoff never modifies existing files; you decide):');

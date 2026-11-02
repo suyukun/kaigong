@@ -29,4 +29,4 @@ proposed
 1. <方案 A> —— 否决理由：<理由>
 2. <方案 B> —— 否决理由：<理由>
 
-<!-- created by specgate; this file is yours to edit by hand -->
+<!-- created by kaigong; this file is yours to edit by hand -->

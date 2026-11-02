@@ -4,12 +4,12 @@
 
 ## OBJECTIVE
 
-Install specgate into the user's environment and prove it works. Change nothing that already exists.
+Install kaigong into the user's environment and prove it works. Change nothing that already exists.
 
 ## DONE WHEN
 
-1. `specgate --version` prints one version line.
-2. In the user's git repository, `specgate start` prints its three routing questions and one exact next command.
+1. `kaigong --version` prints one version line.
+2. In the user's git repository, `kaigong start` prints its three routing questions and one exact next command.
 3. The final report (five lines, fixed format below) is delivered to the user.
 
 Install-verified is not bootstrapped. Creating `AGENTS.md` starts only if the user says yes, as a separate step.
@@ -19,7 +19,7 @@ Install-verified is not bootstrapped. Creating `AGENTS.md` starts only if the us
 1. **Ask first.** Ask the user before every command in this file and before every file change. Batch one step into one shell call, so the user approves once per step.
 2. **Never delete or overwrite.** An existing file stays exactly as it is. If a step would touch one, stop and report instead.
 3. **One install method.** Dev dependency, global, or npx. Ask which one. Install exactly one.
-4. **Already installed? Keep it.** Report the found version. Offer `npm update specgate` — ask before running that too.
+4. **Already installed? Keep it.** Report the found version. Offer `npm update kaigong` — ask before running that too.
 5. **No writes to user-global state.** Do not edit shell rc files, editor configs, or agent rules/memory files to "make it work". Suggest the line; the user writes it, or approves it explicitly.
 6. **Report failures as failures.** Do not bypass checks, pin odd versions, or retry in a loop to force success. A failing check is a valid result to report.
 7. **Stay in this file.** Run only the commands written here. Do not clone repositories. Do not build from source. Do not run the package's test suite.
@@ -30,8 +30,8 @@ Install-verified is not bootstrapped. Creating `AGENTS.md` starts only if the us
 - [ ] 0. Preconditions checked (git repo, Node present, agent tool known)
 - [ ] 1. Install method chosen by the user
 - [ ] 2. Installed
-- [ ] 3. `specgate --version` verified
-- [ ] 4. `specgate start` routed in the user's repo
+- [ ] 3. `kaigong --version` verified
+- [ ] 4. `kaigong start` routed in the user's repo
 - [ ] 5. Optional wiring approved and done (or skipped)
 - [ ] 6. Five-line final report delivered
 
@@ -45,11 +45,11 @@ Install-verified is not bootstrapped. Creating `AGENTS.md` starts only if the us
 
 | Method | Command (ask before running) | Fits when |
 | --- | --- | --- |
-| Dev dependency (recommended) | `npm i -D @smashupcn/specgate` | One project. The usual case. |
-| Global | `npm i -g specgate` | Many small repos on one machine. |
-| No install | `npx @smashupcn/specgate@latest <command>` | Trying it out first. |
+| Dev dependency (recommended) | `npm i -D kaigong` | One project. The usual case. |
+| Global | `npm i -g kaigong` | Many small repos on one machine. |
+| No install | `npx kaigong@latest <command>` | Trying it out first. |
 
-Before installing, run `specgate --version` once. If it already prints a version, something is installed: keep it, report the version, and offer the update path (rule 4).
+Before installing, run `kaigong --version` once. If it already prints a version, something is installed: keep it, report the version, and offer the update path (rule 4).
 
 ## Step 2 — Install
 
@@ -63,19 +63,19 @@ If it fails:
 
 ## Step 3 — Verify
 
-`specgate --version` — expected: one line, like `specgate 0.1.1`.
+`kaigong --version` — expected: one line, like `kaigong 0.2.0`.
 
-Fails with "command not found"? For dev-dependency installs, try `npx @smashupcn/specgate --version`. Still failing: report honestly. Do not create aliases, shims, or PATH edits yourself (rule 5).
+Fails with "command not found"? For dev-dependency installs, try `npx kaigong --version`. Still failing: report honestly. Do not create aliases, shims, or PATH edits yourself (rule 5).
 
 ## Step 4 — Route check (the real run)
 
-With the user, in their repository: `specgate start`.
+With the user, in their repository: `kaigong start`.
 
 Expected: three questions print, then one exact next command prints.
 
 Discipline at this step: read the questions to the user. Do not answer them on the user's behalf. The user picks. Then run the printed next command only after the user approves it.
 
-Bootstrap — creating `AGENTS.md` and the two S0 documents — follows the printed route. It is a conversation with the user — mostly conversation time — roughly 10 minutes at S0. Start it only when the user says go. If an `AGENTS.md` already exists, do not touch it; the route is `specgate init --adopt`, which lists conflicts for the user to decide.
+Bootstrap — creating `AGENTS.md` and the two S0 documents — follows the printed route. It is a conversation with the user — mostly conversation time — roughly 10 minutes at S0. Start it only when the user says go. If an `AGENTS.md` already exists, do not touch it; the route is `kaigong init --adopt`, which lists conflicts for the user to decide.
 
 ## Step 5 — Optional wiring (each behind its own explicit yes)
 
@@ -98,11 +98,11 @@ At install time, line 3 normally reads "none". Bootstrap adds files later, under
 
 | Symptom | Likely cause | Do this |
 | --- | --- | --- |
-| `command not found` after a dev-dependency install | Local binary not on PATH | Use `npx @smashupcn/specgate --version`. Report the fact. Do not edit PATH files. |
-| `specgate start` exits with "not a git repository" | Precondition | Ask about `git init` once. |
+| `command not found` after a dev-dependency install | Local binary not on PATH | Use `npx @smashupcn/kaigong --version`. Report the fact. Do not edit PATH files. |
+| `kaigong start` exits with "not a git repository" | Precondition | Ask about `git init` once. |
 | Version prints, questions print, user is unsure | Normal | Stop. Read the questions out. Wait. |
 | npm `EACCES` | Permissions | Report; suggest the user's own fix; no sudo. |
-| An `AGENTS.md` already exists | Adopt path | Do not touch it. Route to `specgate init --adopt`; conflicts get listed for the user. |
+| An `AGENTS.md` already exists | Adopt path | Do not touch it. Route to `kaigong init --adopt`; conflicts get listed for the user. |
 
 ## Execute now
 

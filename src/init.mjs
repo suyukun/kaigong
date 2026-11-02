@@ -1,4 +1,4 @@
-// init.mjs — `specgate init`: scaffold the governance docs.
+// init.mjs — `kaigong init`: scaffold the governance docs.
 // Contract: ADD-ONLY. A file that already exists is never modified — it is
 // listed as "exists, untouched" for a human to decide. Shipped templates are
 // pure copies; AGENTS.md gets only {{OWNER}}/{{PROJECT_NAME}}/{{DATE}} plus the
@@ -14,10 +14,10 @@ const BOOL_FLAGS = ['adopt', 'yes', 'help'];
 const STAGES = new Set(['S0', 'S1', 'S2', 'S3']);
 const MANIFEST_FILE = '.specgate-manifest.json';
 
-const HELP = `specgate init — scaffold governance docs (add-only; existing files are never touched)
+const HELP = `kaigong init — scaffold governance docs (add-only; existing files are never touched)
 
 Usage:
-  specgate init [dir] [options]
+  kaigong init [dir] [options]
 
 Options:
   --stage <S0|S1|S2|S3>   What to install. Default: the stage marker of an existing
@@ -29,7 +29,7 @@ Options:
                           S1+ : the S0 set + plain task board (docs/BACKLOG.md) +
                                 architecture current-state doc (docs/architecture/current.md).
                           S2/S3 install the S1 set; the design spec stays yours to add
-                                (or mark <!-- design: exempt -->) — "specgate check" guides.
+                                (or mark <!-- design: exempt -->) — "kaigong check" guides.
   --adopt                 Existing-repository mode: identical add-only rule, plus a
                           merge hint for your pre-existing AGENTS.md.
   --owner <name>          Decision-maker. Resolution order: flag > git config user.name >
@@ -63,7 +63,7 @@ a newer decision supersedes via the status line and a pointer.
 | --- | --- | --- |
 | — | *(nothing recorded yet)* | — |
 
-<!-- created by specgate; this file is yours to edit by hand -->`;
+<!-- created by kaigong; this file is yours to edit by hand -->`;
 
 // Minimal ADR template (five sections). Used only when templates/adr-template.md
 // is absent — the shipped-template copy wins whenever the file exists.
@@ -98,7 +98,7 @@ Positive / cost / risk / how to reverse.
 1. <option A> — rejected because <reason>
 2. <option B> — rejected because <reason>
 
-<!-- created by specgate; this file is yours to edit by hand -->`;
+<!-- created by kaigong; this file is yours to edit by hand -->`;
 
 const BOARD_MD = `# Task Board
 
@@ -116,7 +116,7 @@ Once volume grows, prefer the backlog.md CLI (npm, pinned 1.55.3, keeps the
 board as plain markdown under backlog/) — this file is the quiet-project
 fallback. Ask the owner before installing anything.
 
-<!-- created by specgate; this file is yours to edit by hand -->`;
+<!-- created by kaigong; this file is yours to edit by hand -->`;
 
 const ARCH_CURRENT = `# Architecture (current)
 
@@ -131,17 +131,17 @@ changes modules, entry points, or data flows (gate doc converge step 7).
 A blueprint (target state) becomes its own document once it diverges from
 current state; direction changes require an ADR.
 
-<!-- created by specgate; this file is yours to edit by hand -->`;
+<!-- created by kaigong; this file is yours to edit by hand -->`;
 
 const SHIM_CURSOR = `---
-description: Project rules pointer (created by specgate)
+description: Project rules pointer (created by kaigong)
 alwaysApply: true
 ---
 
 Read AGENTS.md at the repository root and follow it for all work in this repo.`;
 
 const SHIM_MD = `Read AGENTS.md at the repository root and follow it for all work in this repo.
-(pointer created by specgate — edit or delete freely)`;
+(pointer created by kaigong — edit or delete freely)`;
 
 function todayLocal() {
   const d = new Date();
@@ -174,7 +174,7 @@ export async function runInit(argv) {
   argv = argv.map((a) => (a === '-h' ? '--help' : a));
   const { flags, positionals } = parseArgs(argv, BOOL_FLAGS);
   if (flags.help) { console.log(HELP); return 0; }
-  if (positionals.length > 1) throw new UsageError('unexpected extra argument: ' + positionals[1] + ' (usage: specgate init [dir] [options])');
+  if (positionals.length > 1) throw new UsageError('unexpected extra argument: ' + positionals[1] + ' (usage: kaigong init [dir] [options])');
   const target = resolve(positionals[0] ?? '.');
   if (!existsSync(target)) throw new UsageError('target directory not found: ' + target);
   const dirArg = positionals[0];
@@ -286,7 +286,7 @@ export async function runInit(argv) {
   const manifestWrite = { rel: MANIFEST_FILE, text: JSON.stringify(manifest, null, 2) + '\n', origin: 'plugin manifest — created-file ledger for uninstall checks (safe to delete)' };
 
   // ---- print the plan, then write (discipline: list before any disk write) ----
-  console.log('specgate init — ' + target);
+  console.log('kaigong init — ' + target);
   console.log('stage ' + stage + ' (' + stageSource + ') · owner "' + owner + '" (' + ownerSource + ') · project "' + projectName + '" · docs root "' + toPosix(docsDir) + '"' + (lang === 'zh' ? ' · lang zh' : ''));
   console.log('');
   console.log('Files to write (' + (pending.length + shimToWrite.length + 1) + '):');
@@ -328,7 +328,7 @@ export async function runInit(argv) {
 
   console.log('');
   console.log('Done: ' + (pending.length + shimToWrite.length + 1) + ' written, ' + (untouched.length + shimTaken.length) + ' skipped (untouched).');
-  console.log('Next: 1) review AGENTS.md and fill the <fill in> slots  2) run: specgate check' + (dirArg ? ' ' + dirArg : ''));
+  console.log('Next: 1) review AGENTS.md and fill the <fill in> slots  2) run: kaigong check' + (dirArg ? ' ' + dirArg : ''));
   console.log('Uninstall: delete the files listed in ' + MANIFEST_FILE + ' (sha256 hashes included for verification).');
   return 0;
 }

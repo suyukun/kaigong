@@ -1,30 +1,30 @@
-# specgate
+# kaigong
 
 **You bring the idea. The rules do the decomposing. An ordinary agent raises the building.**
 
-Skyscrapers are not built by genius bricklayers alone. Ordinary crews build them from blueprints: a spec before work starts, decisions on record, an inspection before handover. specgate gives AI coding agents that paperwork. Five plain markdown documents. They grow with your project. The process carries the building — not the talent of one model.
+Skyscrapers are not built by genius bricklayers alone. Ordinary crews build them from blueprints: a spec before work starts, decisions on record, an inspection before handover. kaigong gives AI coding agents that paperwork. Five plain markdown documents. They grow with your project. The process carries the building — not the talent of one model.
 
 [中文版](README.zh-CN.md)
 
 ## DONE WHEN — the 30-second install test
 
-Ask your agent to run `specgate --version` (or run it yourself):
+Ask your agent to run `kaigong --version` (or run it yourself):
 
 ```bash
-specgate --version
+kaigong --version
 ```
 
 **DONE WHEN: the command prints one version line.** That is the whole install test. No config. No login. No network.
 
-Want a second look? Ask your agent to run `specgate start` in any git repository. Three questions print. Then one exact next command prints. If you can read that command, onboarding works.
+Want a second look? Ask your agent to run `kaigong start` in any git repository. Three questions print. Then one exact next command prints. If you can read that command, onboarding works.
 
 ## The shortest path — three steps
 
 > Every command in this README is ask-first. Your agent asks you before running anything. You approve. It runs. Nothing runs on its own.
 
-1. **Install.** Ask your agent to run `npm i -D @smashupcn/specgate`. Then verify with `specgate --version` — one version line means installed.
-2. **Route.** In your git repository, ask your agent to run `specgate start`. Answer three questions. It prints one exact next command. Run it together. A new project takes about 10 minutes with your agent — mostly conversation time: the kit drafts `AGENTS.md` with you, not for you.
-3. **Check.** Ask your agent to run `specgate check`. Expect `PASS <name> (stage S0)`: `AGENTS.md` at the root, the gate-doc template in `docs/plans/`, the ADR index in `docs/adr/`. Your repository now carries its own rulebook.
+1. **Install.** Ask your agent to run `npm i -g kaigong`. Then verify with `kaigong --version` — one version line means installed.
+2. **Route.** In your git repository, ask your agent to run `kaigong start`. Answer three questions. It prints one exact next command. Run it together. A new project takes about 10 minutes with your agent — mostly conversation time: the kit drafts `AGENTS.md` with you, not for you.
+3. **Check.** Ask your agent to run `kaigong check`. Expect `PASS <name> (stage S0)`: `AGENTS.md` at the root, the gate-doc template in `docs/plans/`, the ADR index in `docs/adr/`. Your repository now carries its own rulebook.
 
 Letting an agent install this for you? Hand it [INSTALL.md](INSTALL.md). It is written for the agent, with the same ask-first rules.
 
@@ -49,7 +49,7 @@ A decision does not stay "in the chat". It becomes a numbered file in `docs/adr/
 
 ### 2. Governance assertions — process that does not rely on self-discipline
 
-`specgate check` reads your files and asserts the rules: stage marker versus installed documents, zero open decision cards before dispatch, acceptance criteria in checkable form, task board installed. All findings print at once, in check-item order. Each failure carries where it was found, what was expected, and the exact fix command (where / expected / fix). One line wires the check into CI — added only when you ask.
+`kaigong check` reads your files and asserts the rules: stage marker versus installed documents, zero open decision cards before dispatch, acceptance criteria in checkable form, task board installed. All findings print at once, in check-item order. Each failure carries where it was found, what was expected, and the exact fix command (where / expected / fix). One line wires the check into CI — added only when you ask.
 
 ### 3. Decision cards — decisions become multiple choice
 
@@ -68,7 +68,7 @@ Every requirement reads `When <condition>, the system must <observable behavior>
 | Claude Code | Yes | Nothing to wire. |
 | Codex CLI | Yes | Nothing to wire. |
 | Gemini CLI | Yes | Nothing to wire. |
-| Cursor | No — reads `.cursor/rules/` | `specgate init` offers a one-line pointer file. It asks before creating it. |
+| Cursor | No — reads `.cursor/rules/` | `kaigong init` offers a one-line pointer file. It asks before creating it. |
 | GitHub Copilot | No — reads `.github/copilot-instructions.md` | Same one-line pointer, ask-first. |
 | Windsurf | No — reads `.windsurf/rules/` | Same one-line pointer, ask-first. |
 | Anything else | If it reads its own rules file | Write one line pointing at `AGENTS.md`. Ask first. |
@@ -94,9 +94,9 @@ Tools change how they read rules. This matrix was verified against documentation
 
 | Command | What it does |
 | --- | --- |
-| `specgate start` | The single entry. Three questions, one exact next command. |
-| `specgate check` | Governance assertions. All findings at once, each with a fix example. |
-| `specgate handoff` | Cross-session handoff, written or read (`rose-handoff`). |
+| `kaigong start` | The single entry. Three questions, one exact next command. |
+| `kaigong check` | Governance assertions. All findings at once, each with a fix example. |
+| `kaigong handoff` | Cross-session handoff, written or read (`rose-handoff`). |
 
 **Layer 2 — the full documents.** Read on demand, in this order:
 
@@ -105,8 +105,8 @@ Tools change how they read rules. This matrix was verified against documentation
 3. `templates/gate-doc.example.md` — a fully filled batch
 4. `skills/rose-bootstrap/SKILL.md` and `skills/rose-handoff/SKILL.md` — the flows your agent follows
 
-Templates ship in English by default. `specgate init --lang zh` installs the Chinese set from `templates/zh/` (`specgate check --lang zh` compares against it), and `specgate check` scans `开工门槛-*.md` gate docs alongside `gate-*.md`.
+Templates ship in English by default. `kaigong init --lang zh` installs the Chinese set from `templates/zh/` (`kaigong check --lang zh` compares against it), and `kaigong check` scans `开工门槛-*.md` gate docs alongside `gate-*.md`.
 
 ---
 
-*specgate is an open-source governance kit for AI coding agents. Everything it creates stays in your repository.*
+*kaigong is an open-source governance kit for AI coding agents. Everything it creates stays in your repository.*

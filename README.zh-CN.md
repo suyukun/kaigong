@@ -1,30 +1,30 @@
-# specgate
+# kaigong
 
 **你出想法。规则来拆解。普通 agent 也能盖起大楼。**
 
-高楼从来不是靠天才瓦工一个人砌出来的。普通施工队照着图纸就能盖：开工前有规格、过程有决策记录、交工前有验收。specgate 给 AI 编码 agent 的就是这套图纸——五份纯 markdown 文档，随项目成长。靠流程，不靠天才。
+高楼从来不是靠天才瓦工一个人砌出来的。普通施工队照着图纸就能盖：开工前有规格、过程有决策记录、交工前有验收。kaigong 给 AI 编码 agent 的就是这套图纸——五份纯 markdown 文档，随项目成长。靠流程，不靠天才。
 
 [English](README.md)
 
 ## DONE WHEN——30 秒安装验收
 
-让你的 agent 跑一下 `specgate --version`（自己跑也行）：
+让你的 agent 跑一下 `kaigong --version`（自己跑也行）：
 
 ```bash
-specgate --version
+kaigong --version
 ```
 
 **DONE WHEN：命令打印出一行版本号。** 这就是全部的安装验收——不配置、不登录、不联网。
 
-想再看一眼？在任意 git 仓库里，让你的 agent 跑 `specgate start`。它会打印三个问题，再打印一条确切的下一步命令。你能读懂那条命令，onboarding 就是通的。
+想再看一眼？在任意 git 仓库里，让你的 agent 跑 `kaigong start`。它会打印三个问题，再打印一条确切的下一步命令。你能读懂那条命令，onboarding 就是通的。
 
 ## 最短路径——三步
 
 > 本 README 中所有命令一律 ask-first：agent 先问你，你批准，它才执行。没有任何命令会自己跑。
 
-1. **安装。** 让 agent 跑 `npm i -D @smashupcn/specgate`，再用 `specgate --version` 验收——一行版本号＝装好。
-2. **路由。** 在你的 git 仓库里，让 agent 跑 `specgate start`。回答三个问题，它会打印一条确切的下一步命令。跟着一起跑完——新项目与 agent 协作全程约 10 分钟，其中大部分是对话时间：AGENTS.md 是和你一起起草的，不是替你写完的。
-3. **检查。** 让 agent 跑 `specgate check`。预期输出 `PASS <name> (stage S0)`：仓库根有 `AGENTS.md`，`docs/plans/` 有 gate doc 模板，`docs/adr/` 有决策索引。从此这个仓库自带规则书。
+1. **安装。** 让 agent 跑 `npm i -g kaigong`，再用 `kaigong --version` 验收——一行版本号＝装好。
+2. **路由。** 在你的 git 仓库里，让 agent 跑 `kaigong start`。回答三个问题，它会打印一条确切的下一步命令。跟着一起跑完——新项目与 agent 协作全程约 10 分钟，其中大部分是对话时间：AGENTS.md 是和你一起起草的，不是替你写完的。
+3. **检查。** 让 agent 跑 `kaigong check`。预期输出 `PASS <name> (stage S0)`：仓库根有 `AGENTS.md`，`docs/plans/` 有 gate doc 模板，`docs/adr/` 有决策索引。从此这个仓库自带规则书。
 
 想让 agent 代装？把 [INSTALL.md](INSTALL.md) 交给它——那是写给 agent 的操作说明，同样遵守 ask-first。
 
@@ -49,7 +49,7 @@ S0 先装两件。其余文档在项目发出「看得见的信号」后逐件�
 
 ### 2. 治理断言——制度不靠自觉
 
-`specgate check` 读你的文件并断言规则：阶段标记与已装文档一致；派发前决策卡零未决；验收判据可机判；任务看板已安装。所有发现一次列全，按检查项顺序排列。每条失败都带问题定位、预期样子、确切的修正命令（where / expected / fix）。一行接入 CI——而且只在你要求时才接。
+`kaigong check` 读你的文件并断言规则：阶段标记与已装文档一致；派发前决策卡零未决；验收判据可机判；任务看板已安装。所有发现一次列全，按检查项顺序排列。每条失败都带问题定位、预期样子、确切的修正命令（where / expected / fix）。一行接入 CI——而且只在你要求时才接。
 
 ### 3. 决策卡（decision card）——决策变成选择题
 
@@ -68,7 +68,7 @@ S0 先装两件。其余文档在项目发出「看得见的信号」后逐件�
 | Claude Code | 是 | 无需接线。 |
 | Codex CLI | 是 | 无需接线。 |
 | Gemini CLI | 是 | 无需接线。 |
-| Cursor | 否——读 `.cursor/rules/` | `specgate init` 主动提供一行指针文件；创建前先问你。 |
+| Cursor | 否——读 `.cursor/rules/` | `kaigong init` 主动提供一行指针文件；创建前先问你。 |
 | GitHub Copilot | 否——读 `.github/copilot-instructions.md` | 同样的一行指针，ask-first。 |
 | Windsurf | 否——读 `.windsurf/rules/` | 同样的一行指针，ask-first。 |
 | 其他工具 | 若它读自己的规则文件 | 写一行指向 `AGENTS.md`。先问再写。 |
@@ -94,9 +94,9 @@ S0 先装两件。其余文档在项目发出「看得见的信号」后逐件�
 
 | 命令 | 作用 |
 | --- | --- |
-| `specgate start` | 唯一入口。三个问题，一条确切的下一步命令。 |
-| `specgate check` | 治理断言。所有发现一次列全，每条带修正示例。 |
-| `specgate handoff` | 跨会话交接，写或读（`rose-handoff`）。 |
+| `kaigong start` | 唯一入口。三个问题，一条确切的下一步命令。 |
+| `kaigong check` | 治理断言。所有发现一次列全，每条带修正示例。 |
+| `kaigong handoff` | 跨会话交接，写或读（`rose-handoff`）。 |
 
 **第 2 层——完整文档链。** 按需、按序读：
 
@@ -105,8 +105,8 @@ S0 先装两件。其余文档在项目发出「看得见的信号」后逐件�
 3. `templates/gate-doc.example.md`——一份填好的完整样例
 4. `skills/rose-bootstrap/SKILL.md` 与 `skills/rose-handoff/SKILL.md`——agent 遵循的流程
 
-模板默认为英文；`specgate init --lang zh` 安装 `templates/zh/` 中的中文套件（`specgate check --lang zh` 按中文模板比对版本），`specgate check` 在 `gate-*.md` 之外同时扫描 `开工门槛-*.md` 门槛稿。
+模板默认为英文；`kaigong init --lang zh` 安装 `templates/zh/` 中的中文套件（`kaigong check --lang zh` 按中文模板比对版本），`kaigong check` 在 `gate-*.md` 之外同时扫描 `开工门槛-*.md` 门槛稿。
 
 ---
 
-*specgate 是面向 AI 编码 agent 的开源治理套件。它创建的一切都留在你的仓库里。*
+*kaigong 是面向 AI 编码 agent 的开源治理套件。它创建的一切都留在你的仓库里。*

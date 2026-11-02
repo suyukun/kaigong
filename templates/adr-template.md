@@ -29,4 +29,4 @@ Positive / cost / risk / how to reverse.
 1. <option A> — rejected because <reason>
 2. <option B> — rejected because <reason>
 
-<!-- created by specgate; this file is yours to edit by hand -->
+<!-- created by kaigong; this file is yours to edit by hand -->
