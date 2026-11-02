@@ -1,4 +1,4 @@
-<!-- template_version: 1 -->
+<!-- template_version: 2 -->
 <!-- stage: S0 -->
 
 # AGENTS.md — Project Rules for AI Agents
@@ -93,6 +93,15 @@ Three rules that never bend. The gate doc's B4 check repeats them before every L
 1. **Minimal implementation.** Build exactly what the current spec asks for. No speculative abstraction, configuration, or error handling. If 50 lines solve it, 50 lines ship. Test: "would a senior engineer call this over-engineered?" If yes, simplify.
 2. **Surgical changes.** Change only the lines your task requires. Every changed line must trace to a task or an acceptance criterion. Found unrelated dead code? Mention it; do not delete it unless asked. Clean up only what your own change orphaned (unused imports, variables, functions). Follow the style of the file you are in.
 3. **Ask first.** Deleting files or data, changing a database schema, changing a public API, adding a dependency, releasing publicly — each needs {{OWNER}}'s explicit yes before it happens.
+
+### Minimal non-negotiables — when the user asks to skip process
+
+The user says "skip the ceremony, just start coding"? Most of this kit is negotiable — but two things are not:
+
+1. **The gate doc.** Before coding starts on a batch, a short spec must exist in `docs/plans/`. It can be three lines, but it states what this batch does and does not do.
+2. **The check.** `kaigong check` runs at batch converge, and its real result is pasted back.
+
+Everything else can bend: the design spec can fold into the gate doc, the board can be a text file, docs can be as thin as you like. Whatever gets skipped must be something you agreed with the user — never something the agent dropped by default.
 
 ### Boundaries — three tiers
 
