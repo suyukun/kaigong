@@ -1,8 +1,8 @@
-# onboarding 设计文档 —— `specgate start` 单入口
+# onboarding 设计文档 —— `kaigong start` 单入口
 
 > 状态：设计稿 v1（2026-10-27）。配套文件：同目录 `README.md` / `README.zh-CN.md` / `INSTALL.md`。
 > 口径来源：`docs/research/精品插件方法论调研_20261027.md`（Q2 onboarding＝一个可验证判据＋一条最短路径；Q4 技巧 1/3/4 必落地）；`docs/plans/裁决表-五件套插件_v2.md`（卖点四件、信任卖点、已知限制、性能口径）。
-> 命名注记：包名与命令前缀当前用工作名 `specgate`（npm 可用）。最终命名批复后，对 `specgate` 字符串做全局替换即可，名字已集中出现；技能名 `rose-bootstrap` / `rose-handoff` 是已定稿产物，不随包名变化。本文全部「单入口」均指 `specgate start`。
+> 命名注记：包名与命令前缀当前用工作名 `kaigong`（npm 可用）。最终命名批复后，对 `kaigong` 字符串做全局替换即可，名字已集中出现；技能名 `rose-bootstrap` / `rose-handoff` 是已定稿产物，不随包名变化。本文全部「单入口」均指 `kaigong start`。
 
 ## 0. 设计原则（方法论落地）
 
@@ -11,10 +11,10 @@
 | Onboarding＝一个可验证判据＋一条最短路径；不做功能导览 | 每条路径一个 DONE WHEN；`start` 只打印一条下一步命令 |
 | 单入口路由：命令再多，对外只暴露一个入口 | 第 1 层只有 start / check / handoff 三个动作 |
 | 错误三段式：定位→正例→下一步命令；一次列全；失败不写文件 | 第 4 节规范＋5 个样例 |
-| 第一次验证在 30 秒内完成 | 安装验收＝`specgate --version` 打印一行版本号 |
+| 第一次验证在 30 秒内完成 | 安装验收＝`kaigong --version` 打印一行版本号 |
 | ask-first 是全程纪律 | README 全部命令 ask-first 句式；INSTALL.md Rules 第 1 条 |
 
-## 1. `specgate start` 的行为定义
+## 1. `kaigong start` 的行为定义
 
 ### 1.1 只读预检（先看后问）
 
@@ -53,20 +53,20 @@ After: <执行后应看到的一行预期>   ← 该路径 DONE WHEN 的预告
 - 路由条件：Q1＝全新项目。
 - 打印命令：进入 `rose-bootstrap` 技能流程（5 问 → 起草 AGENTS.md → 安装 S0 两件）。
 - 时间预期如实告知：与 agent 协作全程约 10 分钟，其中大部分是对话时间。是与用户协作起草，不是脚本秒级完成。
-- **DONE WHEN（A）**：仓库根存在 `AGENTS.md` 且无 `{{占位符}}`；标题下有 `<!-- stage: S0 -->`；`docs/plans/gate-doc.template.md` 与 `docs/adr/README.md` 存在；`specgate check` 输出 `PASS <name> (stage S0)`。
+- **DONE WHEN（A）**：仓库根存在 `AGENTS.md` 且无 `{{占位符}}`；标题下有 `<!-- stage: S0 -->`；`docs/plans/gate-doc.template.md` 与 `docs/adr/README.md` 存在；`kaigong check` 输出 `PASS <name> (stage S0)`。
 
 ### 路径 B —— 存量仓库（adopt）
 
 - 路由条件：Q1＝已有代码。
-- 打印命令：`specgate init --adopt`（add-only）。
+- 打印命令：`kaigong init --adopt`（add-only）。
 - 关键规则：已有 AGENTS.md 不覆盖 → 给出模板与你文件的 diff 命令（缺哪些节、哪些规则冲突），逐条由你裁决；旧 to-do 原地不动，到 S1 上板时再统一登记并冻结旧清单。
-- **DONE WHEN（B）**：`git status` 只有新增、无修改；冲突清单（如有）已交用户逐条裁决；`specgate check` 输出 `PASS <name> (stage S0)`，或明确列出未决冲突项——后者不算失败，算「等待裁决」的诚实状态。
+- **DONE WHEN（B）**：`git status` 只有新增、无修改；冲突清单（如有）已交用户逐条裁决；`kaigong check` 输出 `PASS <name> (stage S0)`，或明确列出未决冲突项——后者不算失败，算「等待裁决」的诚实状态。
 
 ### 路径 C —— solo 模式
 
 - 路由条件：Q2＝solo。注意：C 是横跨 A/B 的模式开关，不是第三种仓库状态。
 - 生效点：AGENTS.md 的 OWNER 写 `me`；决策卡自答自（推荐默认直接生效）；D3 验收演示默认 `scripted`（录档），不再是 `with-owner`。
-- **DONE WHEN（C）**：AGENTS.md 的 OWNER=me；第一份 gate doc 的 decision ledger 中卡片为 `NC-RESOLVED`（自答）或 `NC-N/A`；D3 模式标注 `scripted`；`specgate check` PASS。
+- **DONE WHEN（C）**：AGENTS.md 的 OWNER=me；第一份 gate doc 的 decision ledger 中卡片为 `NC-RESOLVED`（自答）或 `NC-N/A`；D3 模式标注 `scripted`；`kaigong check` PASS。
 
 ### 路由矩阵
 
@@ -74,17 +74,17 @@ After: <执行后应看到的一行预期>   ← 该路径 DONE WHEN 的预告
 | --- | --- | --- | --- |
 | 全新 | solo | 搭治理 | `rose-bootstrap`（solo 模式） |
 | 全新 | with-owner | 搭治理 | `rose-bootstrap` |
-| 存量 | 任意 | 搭治理 | `specgate init --adopt` |
-| 存量 | 任意 | 补缺件 | `specgate init --adopt`（或 `specgate init --stage S<n>`） |
-| 任意 | 任意 | 只查 | `specgate check`（不改任何文件） |
+| 存量 | 任意 | 搭治理 | `kaigong init --adopt` |
+| 存量 | 任意 | 补缺件 | `kaigong init --adopt`（或 `kaigong init --stage S<n>`） |
+| 任意 | 任意 | 只查 | `kaigong check`（不改任何文件） |
 
 ## 3. 空态微文案（三状态三句话，每句只有一个动作）——(v0.2) 本节为设计稿目标，v0.1 不交付
 
 | 状态 | 文案（产品文案为英文） | 唯一动作 |
 | --- | --- | --- |
-| 空仓库 | `No governance files yet. AGENTS.md is the first one.` | run `specgate start` |
-| 有 AGENTS.md 缺件 | `AGENTS.md found. Missing: ADR index, gate-doc template.` | run `specgate init --adopt` |
-| 有冲突 | `2 rule conflicts found.` | run `specgate init --adopt`（查看 exists, untouched 冲突列表） |
+| 空仓库 | `No governance files yet. AGENTS.md is the first one.` | run `kaigong start` |
+| 有 AGENTS.md 缺件 | `AGENTS.md found. Missing: ADR index, gate-doc template.` | run `kaigong init --adopt` |
+| 有冲突 | `2 rule conflicts found.` | run `kaigong init --adopt`（查看 exists, untouched 冲突列表） |
 
 ## 4. 错误提示三段式 —— 规范与 5 个样例
 
@@ -98,7 +98,7 @@ After: <执行后应看到的一行预期>   ← 该路径 DONE WHEN 的预告
 ✗ . [precondition] Not a git repository. Rollback needs version control.
   Wrong:   bootstrap in an un-initialized directory
   Correct: git init && git commit --allow-empty -m "chore: init"
-  Next:    ask the user, then: specgate start
+  Next:    ask the user, then: kaigong start
 No files were changed.
 ```
 
@@ -108,7 +108,7 @@ No files were changed.
 ✗ AGENTS.md:6 [adopt] Placeholder {{OWNER}} not replaced.
   Wrong:   | {{OWNER}} | the decision-maker |
   Correct: | me | the decision-maker (solo) |
-  Next:    grep -n "{{" AGENTS.md  → replace all, then: specgate check
+  Next:    grep -n "{{" AGENTS.md  → replace all, then: kaigong check
 No files were changed.
 ```
 
@@ -117,7 +117,7 @@ No files were changed.
 ```text
 ✗ docs/plans/gate-expense_v1.md:18 [kickoff] 2 NC-OPEN cards — no coding dispatch.
   Correct: | NC-1 | currency? | a | NC-RESOLVED: 1a — single currency; multi parked on the board |
-  Next:    send cards as one batch; reply "1a 2 default"; then: specgate check
+  Next:    send cards as one batch; reply "1a 2 default"; then: kaigong check
 No files were changed.
 ```
 
@@ -128,7 +128,7 @@ No files were changed.
   Wrong:   The search must be reasonably fast.
   Correct: AC-3: When the user submits a query, the system must return results within 2s.
            (check: src/search.test.ts "latency")
-  Next:    rewrite all flagged ACs, then: specgate check   ← fix the full list at once
+  Next:    rewrite all flagged ACs, then: kaigong check   ← fix the full list at once
 No files were changed.
 ```
 
@@ -138,7 +138,7 @@ No files were changed.
 ✗ docs/plans/gate-payment_v1.md:88 [adr] L batch converging without an adr: reference.
   Wrong:   (converge section carries no ADR line)
   Correct: B2 decision 1 → docs/adr/0001-storage.md; commit "feat: payment (ADR-0001)"
-  Next:    write the ADR + its index entry, then: specgate check
+  Next:    write the ADR + its index entry, then: kaigong check
 No files were changed.
 ```
 

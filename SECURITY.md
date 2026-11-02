@@ -2,8 +2,8 @@
 
 ## What this project is
 
-specgate is a governance kit for repositories AI agents work in: markdown templates, two
-agent skills, and a local CLI (`specgate init`, `specgate check`). It has zero runtime
+kaigong is a governance kit for repositories AI agents work in: markdown templates, two
+agent skills, and a local CLI (`kaigong init`, `kaigong check`). It has zero runtime
 dependencies, makes no network calls, and stores everything as plain markdown inside your
 repository.
 
@@ -28,9 +28,9 @@ already in place:
 
 - **Every command in the README, `INSTALL.md`, and the skills is ask-first.** An agent asks
   you before running anything; nothing runs on its own.
-- **Templates carry commands as documentation, not as something the kit executes.** `specgate
+- **Templates carry commands as documentation, not as something the kit executes.** `kaigong
   check` reads files and prints findings; it writes nothing and executes nothing.
-- **`specgate init` is add-only.** It never modifies an existing file, so a template cannot
+- **`kaigong init` is add-only.** It never modifies an existing file, so a template cannot
   silently rewrite rules already in your repository. Collisions are listed for you to decide.
 - **Rollback is clean.** Everything created is new markdown; delete the added files or revert
   the commits and the repository is exactly as before.

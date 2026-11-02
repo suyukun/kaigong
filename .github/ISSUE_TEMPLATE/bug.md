@@ -13,9 +13,9 @@ What happened, in one or two sentences.
 
 Use the smallest repository you can. Number every step.
 
-1. `npm i -D specgate` (or note if running from source: `node src/cli.mjs …`)
-2. `specgate init . --stage S0 --owner You --project-name Demo`
-3. `specgate check . --strict`
+1. `npm i -D kaigong` (or note if running from source: `node src/cli.mjs …`)
+2. `kaigong init . --stage S0 --owner You --project-name Demo`
+3. `kaigong check . --strict`
 4. …
 
 ## Expected output
@@ -32,7 +32,7 @@ Paste the real output. Please include the exit code:
 
 ## Environment
 
-- specgate version (`specgate --version`):
+- kaigong version (`kaigong --version`):
 - Node.js version (`node --version`):
 - Platform and shell (OS, architecture, terminal):
 - Agent tool in use, if the problem involves a skill or pointer file (Claude Code, Codex CLI,
@@ -41,5 +41,5 @@ Paste the real output. Please include the exit code:
 
 ## Did the kit change your files?
 
-specgate is add-only and `check` writes nothing. If an existing file was modified, say which
+kaigong is add-only and `check` writes nothing. If an existing file was modified, say which
 file and attach `git status --porcelain` — that is the most useful single piece of evidence.

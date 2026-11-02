@@ -26,7 +26,7 @@ rule — whichever it is. Sketch the smallest version, not the full product.
 
 ## Why it belongs in this kit
 
-specgate is a governance kit for repositories AI agents work in: plain markdown, zero runtime
+kaigong is a governance kit for repositories AI agents work in: plain markdown, zero runtime
 dependencies, offline after install, add-only, ask-first. Does this proposal fit those
 constraints? If it needs a server, a database, a network call, or editing an existing file,
 say how you would square that.

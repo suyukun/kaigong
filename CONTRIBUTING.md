@@ -8,7 +8,7 @@ Requirements: Node.js >= 18. There are no runtime dependencies and no install st
 the source.
 
 ```bash
-git clone <your-fork> && cd specgate
+git clone <your-fork> && cd kaigong
 npm test            # same as: node test/smoke.mjs
 ```
 
