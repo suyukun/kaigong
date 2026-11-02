@@ -20,8 +20,9 @@
 //                           (wording present / old wording gone / no half-wired
 //                           checker in src); the walkthrough itself stays human.
 //
-// The denominator was fixed at 51 for v0.1.0 and grew to 57 in v0.1.1 by
-// appending the L section — rows are never removed or renumbered. Exit 0 = all PASS.
+// The denominator was fixed at 51 for v0.1.0, grew to 57 in v0.1.1 (L section)
+// and to 60 in v0.2.0 (K section: kaigong rename blind-spot/template claims)
+// — rows are never removed or renumbered. Exit 0 = all PASS.
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
@@ -32,8 +33,8 @@ import { fileURLToPath } from 'node:url';
 const PKG = fileURLToPath(new URL('..', import.meta.url));
 const CLI = join(PKG, 'src', 'cli.mjs');
 const NODE = process.execPath;
-const root = mkdtempSync(join(tmpdir(), 'specgate-claims-'));
-const TOTAL = 57; // fixed denominator — grows only by appending claims (51 + v0.1.1 L-01..L-06)
+const root = mkdtempSync(join(tmpdir(), 'kaigong-claims-'));
+const TOTAL = 60; // fixed denominator — grows only by appending claims (51 + v0.1.1 L-01..L-06 + v0.2.0 K-01..K-03)
 
 // ---------------------------------------------------------------------------
 // helpers
@@ -178,12 +179,15 @@ function packListing() {
 // C — 命令类 (12)
 // ===========================================================================
 
-claim('C-01', 'IMPL', '--version prints exactly one version line in the documented prefixed format, exit 0', () => {
+claim('C-01', 'IMPL', '--version prints exactly one version line in the documented prefixed format (kaigong <semver>, 0.2.0 this release), exit 0', () => {
+  const pkg = JSON.parse(read('package.json'));
   const r = run(['--version']);
   return first(
     eq(r.status, 0, 'exit --version'),
     eq((String(r.stdout).match(/\n/g) || []).length, 1, 'exactly one line'),
-    match(/^specgate \d+\.\d+\.\d+$/m, r.stdout, 'format matches INSTALL.md Step 3 example'),
+    match(/^kaigong \d+\.\d+\.\d+$/m, r.stdout, 'format matches INSTALL.md Step 3 example'),
+    eq(String(r.stdout).trim(), 'kaigong ' + pkg.version, 'version line equals the package.json version'),
+    eq(pkg.version, '0.2.0', 'v0.2.0 kaigong release version'),
     eq(r.stdout, run(['-v']).stdout, '-v equals --version'),
     eq(r.stdout, run(['version']).stdout, 'version equals --version'),
   );
@@ -260,7 +264,7 @@ claim('C-07', 'DELETE', 'init --fill deleted for v0.1: still exits 2 and "--fill
   return first(
     eq(r.status, 2, 'exit init --fill'),
     gone('--fill', NO_CHANGELOG, '--fill wording removed everywhere it would be a live promise'),
-    gone('run specgate init --fill', PRIMARY, 'empty-state hint rewritten to live commands'),
+    gone('run kaigong init --fill', PRIMARY, 'empty-state hint rewritten to live commands'),
   );
 });
 
@@ -289,7 +293,7 @@ claim('C-10', 'DELETE', 'profile/adr/spec/design/board/migrate deleted for v0.2:
   return first(
     eq(wrong.length, 0, 'all six deleted commands exit 2 (' + wrong.join(',') + ')'),
     gone('profile full', PRIMARY, 'profile full wording removed'),
-    absent(/specgate (profile|adr|spec|design|board|migrate)\b/, read('README.md') + read('README.zh-CN.md'), 'no deleted command advertised in the READMEs'),
+    absent(/kaigong (profile|adr|spec|design|board|migrate)\b/, read('README.md') + read('README.zh-CN.md'), 'no deleted command advertised in the READMEs'),
   );
 });
 
@@ -299,7 +303,8 @@ claim('C-11', 'IMPL', 'publish-ready: private flag gone, bin wired, npm pack shi
   const has = (rel) => pack.paths.includes(rel);
   return first(
     eq(pkg.private, undefined, 'private flag removed from package.json'),
-    eq(pkg.bin && pkg.bin.specgate, 'dist/cli.mjs', 'bin.specgate -> dist/cli.mjs'),
+    eq(pkg.name, 'kaigong', 'npm package name is the bare kaigong'),
+    eq(pkg.bin && pkg.bin.kaigong, 'dist/cli.mjs', 'bin.kaigong -> dist/cli.mjs'),
     eq(pack.status, 0, 'npm pack --dry-run exit'),
     eq(has('CHANGELOG.md'), true, 'changelog packed'),
     eq(has('THIRD_PARTY_NOTICES.md'), true, 'notices packed'),
@@ -437,7 +442,7 @@ claim('A-08', 'DELETE', 'pointer existence verification deleted for v0.2: README
 claim('A-09', 'IMPL', 'template_version stale assertion: behind → WARN naming both versions, FAIL --strict; ahead → no nagging', () => {
   const { dir: t } = freshInit('a09');
   const clean = run(['check', t]);
-  writeFileSync(join(t, 'AGENTS.md'), agentsOf(t).replace('<!-- template_version: 1 -->', '<!-- template_version: 0 -->'));
+  writeFileSync(join(t, 'AGENTS.md'), agentsOf(t).replace('<!-- template_version: 2 -->', '<!-- template_version: 0 -->'));
   const w = run(['check', t]);
   const s = run(['check', t, '--strict']);
   writeFileSync(join(t, 'AGENTS.md'), agentsOf(t).replace('<!-- template_version: 0 -->', '<!-- template_version: 9 -->'));
@@ -445,7 +450,7 @@ claim('A-09', 'IMPL', 'template_version stale assertion: behind → WARN naming 
   return first(
     match(/^PASS a09 \(stage S0\)$/m, clean.stdout, 'fresh init not flagged'),
     eq(w.status, 0, 'behind → WARN exit 0'),
-    match(/template_version stale .*\(0 < 1\)/, w.stdout, 'finding names both versions'),
+    match(/template_version stale .*\(0 < 2\)/, w.stdout, 'finding names both versions'),
     eq(s.status, 1, 'behind → FAIL under --strict'),
     match(/^PASS a09 \(stage S0\)$/m, ahead.stdout, 'ahead of shipped → not stale'),
   );
@@ -683,7 +688,7 @@ claim('F-01', 'IMPL', 'template_version header shipped in all three templates an
   return first(
     eq(hits.length, 3, 'templates carrying the header on line 1'),
     eq(srcHas('template_version'), true, 'src consumes template_version'),
-    present('upgrades warn only — specgate never edits your file', ['src/check.mjs'], 'warn-only semantics in the stale fix text'),
+    present('upgrades warn only — kaigong never edits your file', ['src/check.mjs'], 'warn-only semantics in the stale fix text'),
   );
 });
 
@@ -828,9 +833,9 @@ claim('F-12', 'IMPL', 'every command advertised in the READMEs runs with the doc
   ];
   for (const v of invocations) {
     const r = run(v.args, v.dir);
-    if (r.status !== v.want) return eq(r.status, v.want, 'specgate ' + v.args.join(' ') + ' exit');
+    if (r.status !== v.want) return eq(r.status, v.want, 'kaigong ' + v.args.join(' ') + ' exit');
   }
-  const advertised = (read('README.md') + read('README.zh-CN.md')).match(/(?<![A-Za-z-])specgate (start|check|init|handoff|--version|profile|adr|spec|design|board|migrate)(?![A-Za-z0-9-])/g) || [];
+  const advertised = (read('README.md') + read('README.zh-CN.md')).match(/(?<![A-Za-z-])kaigong (start|check|init|handoff|--version|profile|adr|spec|design|board|migrate)(?![A-Za-z0-9-])/g) || [];
   const banned = advertised.filter((s) => / (profile|adr|spec|design|board|migrate)$/.test(s));
   return first(
     eq(banned.length, 0, 'deleted commands still advertised (' + banned.join(',') + ')'),
@@ -934,6 +939,93 @@ claim('L-06', 'IMPL', 'zh templates privacy red line: no internal paths, names, 
   return first(
     eq(hit.length, 0, 'banned literals absent (' + hit.join(',') + ')'),
     eq(wordHit.length, 0, 'banned word-boundary tokens absent (RL/REA/PPT/P##)'),
+  );
+});
+
+// ===========================================================================
+// K — v0.2.0 kaigong 批次 (3) — AC-1/AC-2 check 盲区 · AC-3 模板最小不协商集
+// ===========================================================================
+
+claim('K-01', 'IMPL', 'AC-1 kickoff blind spot: source files with no actual gate doc → one finding naming kickoff; excluded dirs and gate-doc copies stay silent', () => {
+  const t = join(root, 'k01');
+  mkdirSync(join(t, 'docs', 'plans'), { recursive: true });
+  mkdirSync(join(t, 'docs', 'adr'), { recursive: true });
+  writeFileSync(join(t, 'docs', 'adr', 'README.md'), '# idx\n');
+  writeFileSync(join(t, 'AGENTS.md'), '# P\n\n<!-- stage: S0 -->\n');
+  writeFileSync(join(t, 'docs', 'plans', 'gate-doc.template.md'), read('templates/gate-doc.template.md'));
+  const before = run(['check', t]); // docs only, no code: the blind-spot rule stays silent
+  mkdirSync(join(t, 'src'));
+  writeFileSync(join(t, 'src', 'app.py'), 'print(1)\n');
+  const w = run(['check', t]);
+  const s = run(['check', t, '--strict']);
+  writeFileSync(join(t, 'docs', 'plans', 'gate-first_v1.md'), '# Gate\n\n| NC-1 | a? | a | NC-RESOLVED: 1a |\n');
+  const after = run(['check', t]); // an actual gate doc exists: silent again
+  // node_modules/ and docs/ are never scanned as "code"
+  const ex = join(root, 'k01-excluded');
+  mkdirSync(join(ex, 'node_modules', 'dep'), { recursive: true });
+  writeFileSync(join(ex, 'node_modules', 'dep', 'x.js'), 'x\n');
+  mkdirSync(join(ex, 'docs', 'adr'), { recursive: true });
+  writeFileSync(join(ex, 'AGENTS.md'), '# P\n\n<!-- stage: S0 -->\n');
+  writeFileSync(join(ex, 'docs', 'adr', 'README.md'), '# idx\n');
+  writeFileSync(join(ex, 'docs', 'helper.js'), 'x\n');
+  const exr = run(['check', ex]);
+  return first(
+    match(/^PASS k01 \(stage S0\)$/, String(before.stdout).trim(), 'no source files → not flagged'),
+    eq(w.status, 0, 'blind spot → default WARN exit'),
+    match(/kickoff blind spot/, w.stdout, 'finding title contains kickoff'),
+    match(/src\/app\.py — source file found/, w.stdout, 'where names the first source file'),
+    match(/no actual gate doc/, w.stdout, 'where states the missing gate doc'),
+    eq(s.status, 1, 'blind spot → FAIL under --strict'),
+    match(/^PASS k01 \(stage S0\)$/m, after.stdout, 'actual gate doc present → not flagged'),
+    match(/^PASS k01-excluded \(stage S0\)$/, String(exr.stdout).trim(), 'node_modules/ and docs/ files not counted as code'),
+  );
+});
+
+claim('K-02', 'IMPL', 'AC-2 stage dead water: S0 plus a runnable entry signal → S1 advisory naming kaigong init; no signal → silent; stacks on the S0 ADR advisory', () => {
+  const mk = (name, files) => {
+    const t = join(root, name);
+    mkdirSync(join(t, 'docs', 'adr'), { recursive: true });
+    writeFileSync(join(t, 'AGENTS.md'), '# P\n\n<!-- stage: S0 -->\n');
+    writeFileSync(join(t, 'docs', 'adr', 'README.md'), '# idx\n');
+    for (const [rel, text] of Object.entries(files || {})) writeFileSync(join(t, rel), text);
+    return t;
+  };
+  const a = run(['check', mk('k02-start', { 'package.json': '{\n  "scripts": { "start": "node index.js" }\n}\n' })]);
+  const b = run(['check', mk('k02-quiet', { 'package.json': '{\n  "name": "x",\n  "scripts": { "test": "node test" }\n}\n' })]);
+  const c = run(['check', mk('k02-cargo', { 'Cargo.toml': '[package]\nname = "x"\n' })]);
+  const d = join(root, 'k02-stack');
+  mkdirSync(join(d, 'docs'), { recursive: true }); // no docs/adr/README.md: the S0 advisory must survive
+  writeFileSync(join(d, 'AGENTS.md'), '# P\n\n<!-- stage: S0 -->\n');
+  writeFileSync(join(d, 'package.json'), '{\n  "scripts": { "start": "node index.js" }\n}\n');
+  const dr = run(['check', d]);
+  const n = (String(dr.stdout).match(/^\[\d+\/\d+\]/gm) || []).length;
+  return first(
+    eq(a.status, 0, 'dead water → default WARN exit'),
+    match(/Stage S0 with a runnable entry point — consider S1 \(advisory\)/, a.stdout, 'advisory finding title'),
+    match(/package\.json — declares "scripts\.start" \(node index\.js\)/, a.stdout, 'where names the signal'),
+    match(/kaigong init .*--stage S1/, a.stdout, 'fix gives the renamed init command for S1'),
+    match(/^PASS k02-quiet \(stage S0\)$/, String(b.stdout).trim(), 'package.json without bin/main/scripts.start → silent'),
+    match(/consider S1/, c.stdout, 'Cargo.toml counts as a main-flow signal'),
+    eq(n, 2, 'stacks on the S0 ADR-index advisory (2 findings, not a replacement)'),
+  );
+});
+
+claim('K-03', 'IMPL', 'AC-3 minimal non-negotiables: zh/en AGENTS templates carry the section (gate doc + check stay; the rest negotiated), template_version bumped to 2 and equal', () => {
+  const en = read('templates/AGENTS.template.md');
+  const zh = read('templates/zh/AGENTS.template.md');
+  const v = (t) => (t.match(/<!--\s*template_version:\s*(\d+)\s*-->/) || [])[1];
+  return first(
+    match(/### Minimal non-negotiables — when the user asks to skip process/, en, 'en section heading'),
+    match(/### 最小不协商集 —— 用户要求「跳过流程」时/, zh, 'zh section heading'),
+    match(/The gate doc\./, en, 'en keeps the gate doc'),
+    match(/\*\*The check\.\*\* `kaigong check`/, en, 'en keeps the check with the renamed command'),
+    match(/\*\*开工门槛稿。\*\*/, zh, 'zh keeps the gate doc'),
+    match(/\*\*检查。\*\* 收口时跑一遍 `kaigong check`/, zh, 'zh keeps the check with the renamed command'),
+    match(/never something the agent dropped by default/, en, 'en: skipped means negotiated, not defaulted'),
+    match(/不是 agent 自己默认跳过的/, zh, 'zh: skipped means negotiated, not defaulted'),
+    eq(v(en), '2', 'en template_version bumped to 2'),
+    eq(v(zh), '2', 'zh template_version bumped to 2'),
+    eq(v(en), v(zh), 'en/zh template_version equal'),
   );
 });
 

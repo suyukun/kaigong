@@ -11,7 +11,7 @@ const CLI = fileURLToPath(new URL('../src/cli.mjs', import.meta.url));
 const PKG = fileURLToPath(new URL('..', import.meta.url));
 const GATE_TPL = readFileSync(join(PKG, 'templates', 'gate-doc.template.md'), 'utf8');
 
-const root = mkdtempSync(join(tmpdir(), 'specgate-smoke-'));
+const root = mkdtempSync(join(tmpdir(), 'kaigong-smoke-'));
 let passed = 0;
 let failed = 0;
 
@@ -75,7 +75,7 @@ console.log('T4 check WARN (ADR index removed)');
   const w = run(['check', t]);
   ok('T4 exit 0 + WARN (stage S0) format', w.status === 0 && /WARN Demo \(stage S0\) — 1 finding/.test(w.stdout), w.stdout);
   ok('T4 three-part finding', /where    :/.test(w.stdout) && /expected :/.test(w.stdout) && /fix      :/.test(w.stdout));
-  ok('T4 fix suggests init', /specgate init .* --stage S0/.test(w.stdout));
+  ok('T4 fix suggests init', /kaigong init .* --stage S0/.test(w.stdout));
 }
 console.log('T5 check FAIL under --strict');
 {
@@ -193,24 +193,24 @@ console.log('T11 custom docs root (--docs-dir governance)');
   ok('T11 default docs root → finding', c2.status === 1 && /docs\/adr\/README\.md/.test(c2.stdout), c2.stdout);
 }
 
-// ---- T12: --version format (C-01: one line, "specgate <version>") ----
+// ---- T12: --version format (C-01: one line, "kaigong <version>") ----
 console.log('T12 --version / -v / version format');
 {
-  const expect = 'specgate 0.1.1';
+  const expect = 'kaigong 0.2.0';
   const r1 = run(['--version']);
   ok('T12 --version exit 0', r1.status === 0, r1.stderr);
-  ok('T12 --version prints "specgate 0.1.0"', r1.stdout.trim() === expect, r1.stdout);
+  ok('T12 --version prints "kaigong 0.2.0"', r1.stdout.trim() === expect, r1.stdout);
   ok('T12 --version is exactly one line', r1.stdout.trim().split('\n').length === 1, r1.stdout);
   const r2 = run(['-v']);
   ok('T12 -v matches', r2.status === 0 && r2.stdout.trim() === expect, r2.stdout);
   const r3 = run(['version']);
   ok('T12 version subcommand matches', r3.status === 0 && r3.stdout.trim() === expect, r3.stdout);
   const h = run([]);
-  ok('T12 top help lists start/handoff', /specgate start /.test(h.stdout) && /specgate handoff /.test(h.stdout), h.stdout);
+  ok('T12 top help lists start/handoff', /kaigong start /.test(h.stdout) && /kaigong handoff /.test(h.stdout), h.stdout);
 }
 
-// ---- T13: specgate start (C-02/A-15/A-16: precheck + 3 questions + Route/Next/After, read-only) ----
-console.log('T13 specgate start — precheck, routing, read-only');
+// ---- T13: kaigong start (C-02/A-15/A-16: precheck + 3 questions + Route/Next/After, read-only) ----
+console.log('T13 kaigong start — precheck, routing, read-only');
 {
   const walk = (t) => {
     const out = [];
@@ -233,7 +233,7 @@ console.log('T13 specgate start — precheck, routing, read-only');
   const a = run(['start', n1]);
   ok('T13 non-git exit 1', a.status === 1, 'status=' + a.status);
   ok('T13 non-git precondition block', /\[precondition\] Not a git repository/.test(a.stdout) && /Rollback needs version control/.test(a.stdout), a.stdout);
-  ok('T13 non-git Wrong/Correct/Next lines', /Wrong:/.test(a.stdout) && /Correct: git init/.test(a.stdout) && /Next:    ask the user, then: specgate start/.test(a.stdout), a.stdout);
+  ok('T13 non-git Wrong/Correct/Next lines', /Wrong:/.test(a.stdout) && /Correct: git init/.test(a.stdout) && /Next:    ask the user, then: kaigong start/.test(a.stdout), a.stdout);
   ok('T13 non-git ends with No files were changed.', a.stdout.trim().endsWith('No files were changed.'), a.stdout);
   ok('T13 non-git no Route block', !/\nRoute: /.test(a.stdout), a.stdout);
   ok('T13 non-git wrote nothing', readdirSync(n1).length === 0, readdirSync(n1).join(','));
@@ -249,7 +249,7 @@ console.log('T13 specgate start — precheck, routing, read-only');
   const routeLines = b.stdout.split('\n').filter((l) => /^(Route:|Next:  |After:)/.test(l));
   ok('T13 exactly Route/Next/After three lines', routeLines.length === 3, JSON.stringify(routeLines));
   ok('T13 Route A solo', /^Route: A · mode: solo$/.test(routeLines[0]), routeLines[0]);
-  ok('T13 Route A Next is a copyable init command', /^Next:  specgate init .*--stage S0/.test(routeLines[1]), routeLines[1]);
+  ok('T13 Route A Next is a copyable init command', /^Next:  kaigong init .*--stage S0/.test(routeLines[1]), routeLines[1]);
   ok('T13 Route A skill is the Optional deep-dive line', /^Optional deep-dive: rose-bootstrap skill .*SKILL\.md/m.test(b.stdout), b.stdout);
   ok('T13 After previews PASS (stage S0)', /PASS t13-green \(stage S0\)/.test(routeLines[2]), routeLines[2]);
   ok('T13 non-interactive defaults note', /non-interactive run/.test(b.stdout), b.stdout);
@@ -263,7 +263,7 @@ console.log('T13 specgate start — precheck, routing, read-only');
   const c = run(['start', c1]);
   ok('T13 existing-code exit 0', c.status === 0, c.stderr);
   ok('T13 Q1 default existing', /\[default: existing\]/.test(c.stdout), c.stdout);
-  ok('T13 Route B + init --adopt', /^Route: B · mode: solo$/m.test(c.stdout) && /Next:  specgate init --adopt .*t13-adopt/.test(c.stdout), c.stdout);
+  ok('T13 Route B + init --adopt', /^Route: B · mode: solo$/m.test(c.stdout) && /Next:  kaigong init --adopt .*t13-adopt/.test(c.stdout), c.stdout);
 
   // d) governed repo (init S0, owner me) -> default intent check
   const d1 = join(root, 't13-check');
@@ -273,7 +273,7 @@ console.log('T13 specgate start — precheck, routing, read-only');
   const d = run(['start', d1]);
   ok('T13 governed repo exit 0', d.status === 0, d.stderr);
   ok('T13 Q3 default check', /Q3 this run .*\[default: check\]/.test(d.stdout), d.stdout);
-  ok('T13 Route check + Next specgate check', /^Route: check · mode: solo$/m.test(d.stdout) && /Next:  specgate check .*t13-check/.test(d.stdout), d.stdout);
+  ok('T13 Route check + Next kaigong check', /^Route: check · mode: solo$/m.test(d.stdout) && /Next:  kaigong check .*t13-check/.test(d.stdout), d.stdout);
   ok('T13 AGENTS.md row shows stage + owner + never modified', /AGENTS\.md         : found \(stage S0, owner me\) — never modified/.test(d.stdout), d.stdout);
 
   // e) S1 marker with missing docs -> default fill
@@ -283,13 +283,13 @@ console.log('T13 specgate start — precheck, routing, read-only');
   writeFileSync(join(e1d, 'AGENTS.md'), '# P\n\n<!-- stage: S1 -->\n');
   const e = run(['start', e1d]);
   ok('T13 S1-missing-docs default fill', /Q3 this run .*\[default: fill\]/.test(e.stdout), e.stdout);
-  ok('T13 fill Next = specgate init (stage from marker)', /^Route: B · mode: solo$/m.test(e.stdout) && /Next:  specgate init .*t13-fill /.test(e.stdout) && /stage S1 read from your AGENTS\.md/.test(e.stdout), e.stdout);
+  ok('T13 fill Next = kaigong init (stage from marker)', /^Route: B · mode: solo$/m.test(e.stdout) && /Next:  kaigong init .*t13-fill /.test(e.stdout) && /stage S1 read from your AGENTS\.md/.test(e.stdout), e.stdout);
 
   // f) flags override defaults without a TTY
   const f = run(['start', b1, '--intent', 'check']);
   ok('T13 --intent check overrides default', f.status === 0 && /^Route: check · mode: solo$/m.test(f.stdout), f.stdout);
   const f2 = run(['start', b1, '--repo-state', 'existing', '--intent', 'setup']);
-  ok('T13 --repo-state existing routes B', f2.status === 0 && /Next:  specgate init --adopt .*t13-green/.test(f2.stdout), f2.stdout);
+  ok('T13 --repo-state existing routes B', f2.status === 0 && /Next:  kaigong init --adopt .*t13-green/.test(f2.stdout), f2.stdout);
   const f3 = run(['start', b1, '--decisions', 'with-owner', '--intent', 'setup']);
   ok('T13 --decisions with-owner mode', f3.status === 0 && /^Route: A · mode: with-owner$/m.test(f3.stdout), f3.stdout);
   const f4 = run(['start', b1, '--intent', 'bogus']);
@@ -314,8 +314,8 @@ console.log('T13 specgate start — precheck, routing, read-only');
   ok('T13 tools run still read-only', !existsSync(join(h1, '.windsurf', 'rules', 'agents.md')), 'shim written');
 }
 
-// ---- T14: specgate handoff (C-09: template + routing; --init ask-first) ----
-console.log('T14 specgate handoff — routing template + --init');
+// ---- T14: kaigong handoff (C-09: template + routing; --init ask-first) ----
+console.log('T14 kaigong handoff — routing template + --init');
 {
   const t = join(root, 't14');
   mkdirSync(t);
@@ -404,12 +404,12 @@ console.log('T16 check template_version stale assertion');
   ok('T16 fresh init PASS (no stale finding)', a.status === 0 && /PASS t16 \(stage S0\)/.test(a.stdout) && !/template_version/.test(a.stdout), a.stdout);
 
   // b) behind → stale finding, WARN default, FAIL --strict
-  const agents0 = readFileSync(join(t, 'AGENTS.md'), 'utf8').replace('<!-- template_version: 1 -->', '<!-- template_version: 0 -->');
+  const agents0 = readFileSync(join(t, 'AGENTS.md'), 'utf8').replace('<!-- template_version: 2 -->', '<!-- template_version: 0 -->');
   writeFileSync(join(t, 'AGENTS.md'), agents0);
   const b = run(['check', t]);
   ok('T16 stale → WARN exit 0', b.status === 0 && /WARN t16 \(stage S0\) — 1 finding/.test(b.stdout), b.stdout);
-  ok('T16 stale finding names both versions', /\[1\/1\] template_version stale .*\(0 < 1\)/.test(b.stdout) && /vs shipped templates\/AGENTS\.template\.md "<!-- template_version: 1 -->"/.test(b.stdout), b.stdout);
-  ok('T16 stale fix suggests diff + bump, never edits', /diff "/.test(b.stdout) && /bump the marker to 1/.test(b.stdout) && /specgate never edits your file/.test(b.stdout), b.stdout);
+  ok('T16 stale finding names both versions', /\[1\/1\] template_version stale .*\(0 < 2\)/.test(b.stdout) && /vs shipped templates\/AGENTS\.template\.md "<!-- template_version: 2 -->"/.test(b.stdout), b.stdout);
+  ok('T16 stale fix suggests diff + bump, never edits', /diff "/.test(b.stdout) && /bump the marker to 2/.test(b.stdout) && /kaigong never edits your file/.test(b.stdout), b.stdout);
   ok('T16 stale --strict exit 1', run(['check', t, '--strict']).status === 1);
 
   // c) ahead of shipped → not stale
@@ -496,15 +496,15 @@ console.log('T19 start Next — copyable command + Optional deep-dive');
   spawnSync('git', ['init', '-q', t], { encoding: 'utf8' });
   const nextLine = (out) => (out.match(/^Next:  .*$/m) || [''])[0];
   const a = run(['start', t]);
-  ok('T19 Route A Next is an executable init command', a.status === 0 && /^Next:  (specgate|node) \S+.*--stage S0/.test(nextLine(a.stdout)), nextLine(a.stdout));
+  ok('T19 Route A Next is an executable init command', a.status === 0 && /^Next:  (kaigong|node) \S+.*--stage S0/.test(nextLine(a.stdout)), nextLine(a.stdout));
   ok('T19 Route A skill moved to Optional deep-dive line', /^Optional deep-dive: rose-bootstrap skill.*SKILL\.md/m.test(a.stdout), a.stdout);
   ok('T19 no dangling "the command above"', !/the command above/.test(a.stdout), a.stdout);
   ok('T19 Route/Next/After stays a 3-line block', a.stdout.split('\n').filter((l) => /^(Route:|Next:  |After:)/.test(l)).length === 3, a.stdout);
   const b = run(['start', t, '--repo-state', 'existing']);
-  ok('T19 Route B Next is an executable command', b.status === 0 && /^Next:  (specgate|node)\b.*init --adopt/.test(nextLine(b.stdout)), nextLine(b.stdout));
+  ok('T19 Route B Next is an executable command', b.status === 0 && /^Next:  (kaigong|node)\b.*init --adopt/.test(nextLine(b.stdout)), nextLine(b.stdout));
   ok('T19 Route B Optional deep-dive names the adopt path', /^Optional deep-dive: rose-bootstrap skill \(adopt path\) — /m.test(b.stdout), b.stdout);
   const c = run(['start', t, '--intent', 'check']);
-  ok('T19 Route check Next is an executable command', c.status === 0 && /^Next:  specgate check/.test(nextLine(c.stdout)), nextLine(c.stdout));
+  ok('T19 Route check Next is an executable command', c.status === 0 && /^Next:  kaigong check/.test(nextLine(c.stdout)), nextLine(c.stdout));
 }
 
 // ---- T20: handoff --init creates INDEX.md (walkthrough blocker 6) + project name ----
@@ -605,6 +605,62 @@ console.log('T21 v0.1.1 — --lang zh, 开工门槛 scan, backlog skip, adr temp
   const zhAll = ['AGENTS.template.md', 'gate-doc.template.md', 'gate-doc.example.md', 'adr-template.md'].map((f) => readFileSync(join(ZH_DIR, f), 'utf8')).join('\n').toLowerCase();
   ok('T21 zh privacy: banned literals absent', !/(~\/\.dsh|\.dsh|jack|苏玉坤|rose|ontorun|oneserve|novel-forge|aihot|aipb|mymc|y3000|ontohot|经营分析|制度规范|五件套|local-llm|adr-g)/.test(zhAll));
   ok('T21 zh privacy: banned word tokens absent', !(/(^|[^A-Za-z])RL([^A-Za-z]|$)/.test(zhAll) || /(^|[^A-Za-z])REA([^A-Za-z]|$)/.test(zhAll) || /(^|[^A-Za-z])PPT([^A-Za-z]|$)/.test(zhAll) || /(^|[^A-Za-z])P\d{2}([^A-Za-z]|$)/.test(zhAll)));
+}
+
+// ---- T22: v0.2.0 kaigong rename + the two check blind spots (AC-1/AC-2) ----
+console.log('T22 v0.2.0 — kaigong package/bin/version + kickoff blind spot + S0 dead water');
+{
+  // a) package identity after the rename
+  const pkg = JSON.parse(readFileSync(join(PKG, 'package.json'), 'utf8'));
+  ok('T22 package name is bare kaigong', pkg.name === 'kaigong', pkg.name);
+  ok('T22 bin kaigong -> dist/cli.mjs', pkg.bin && pkg.bin.kaigong === 'dist/cli.mjs', JSON.stringify(pkg.bin));
+  ok('T22 version 0.2.0', pkg.version === '0.2.0', pkg.version);
+  ok('T22 --version prints kaigong 0.2.0', run(['--version']).stdout.trim() === 'kaigong 0.2.0');
+
+  // b) AC-1: source file, no actual gate doc -> kickoff finding
+  const t = join(root, 't22-blind');
+  mkdirSync(join(t, 'docs', 'adr'), { recursive: true });
+  writeFileSync(join(t, 'AGENTS.md'), '# P\n\n<!-- stage: S0 -->\n');
+  writeFileSync(join(t, 'docs', 'adr', 'README.md'), '# idx\n');
+  mkdirSync(join(t, 'src'));
+  writeFileSync(join(t, 'src', 'main.py'), 'print(1)\n');
+  const w = run(['check', t]);
+  ok('T22 AC-1 kickoff finding fires', w.status === 0 && /kickoff blind spot/.test(w.stdout) && /src\/main\.py — source file found/.test(w.stdout), w.stdout);
+  ok('T22 AC-1 --strict fails', run(['check', t, '--strict']).status === 1);
+  mkdirSync(join(t, 'docs', 'plans'), { recursive: true });
+  writeFileSync(join(t, 'docs', 'plans', 'gate-first_v1.md'), '# Gate\n\n| NC-1 | a? | a | NC-RESOLVED: 1a |\n');
+  const fixed = run(['check', t]);
+  ok('T22 AC-1 gate doc present -> PASS again', fixed.status === 0 && /PASS t22-blind \(stage S0\)/.test(fixed.stdout), fixed.stdout);
+
+  // c) AC-1 exclusions: node_modules/ and docs/ never count as code
+  const ex = join(root, 't22-excluded');
+  mkdirSync(join(ex, 'node_modules', 'dep'), { recursive: true });
+  writeFileSync(join(ex, 'node_modules', 'dep', 'x.js'), 'x\n');
+  mkdirSync(join(ex, 'docs', 'adr'), { recursive: true });
+  writeFileSync(join(ex, 'AGENTS.md'), '# P\n\n<!-- stage: S0 -->\n');
+  writeFileSync(join(ex, 'docs', 'adr', 'README.md'), '# idx\n');
+  writeFileSync(join(ex, 'docs', 'helper.js'), 'x\n');
+  const exr = run(['check', ex]);
+  ok('T22 AC-1 node_modules/ and docs/ excluded', exr.status === 0 && /PASS t22-excluded \(stage S0\)/.test(exr.stdout), exr.stdout);
+
+  // d) AC-2: S0 + package.json scripts.start -> upgrade advisory with the renamed init
+  const u = join(root, 't22-dead');
+  mkdirSync(u);
+  writeFileSync(join(u, 'AGENTS.md'), '# P\n\n<!-- stage: S0 -->\n');
+  mkdirSync(join(u, 'docs', 'adr'), { recursive: true });
+  writeFileSync(join(u, 'docs', 'adr', 'README.md'), '# idx\n');
+  writeFileSync(join(u, 'package.json'), '{\n  "name": "x",\n  "scripts": { "start": "node index.js" }\n}\n');
+  const r2 = run(['check', u]);
+  ok('T22 AC-2 S1 advisory fires', r2.status === 0 && /Stage S0 with a runnable entry point — consider S1 \(advisory\)/.test(r2.stdout), r2.stdout);
+  ok('T22 AC-2 fix names kaigong init --stage S1', /kaigong init .*--stage S1/.test(r2.stdout), r2.stdout);
+  const q = join(root, 't22-quiet');
+  mkdirSync(q);
+  writeFileSync(join(q, 'AGENTS.md'), '# P\n\n<!-- stage: S0 -->\n');
+  mkdirSync(join(q, 'docs', 'adr'), { recursive: true });
+  writeFileSync(join(q, 'docs', 'adr', 'README.md'), '# idx\n');
+  writeFileSync(join(q, 'package.json'), '{\n  "name": "x",\n  "scripts": { "test": "node test.js" }\n}\n');
+  const qr = run(['check', q]);
+  ok('T22 AC-2 no runnable signal -> silent', qr.status === 0 && /PASS t22-quiet \(stage S0\)/.test(qr.stdout), qr.stdout);
 }
 
 // ---- summary ----
