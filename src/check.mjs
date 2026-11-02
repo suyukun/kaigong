@@ -1,4 +1,4 @@
-// check.mjs — `specgate check`: stage-aware governance audit.
+// check.mjs — `kaigong check`: stage-aware governance audit.
 // Ported from governance-stage-check.sh (the authoritative bash source) with
 // plugin semantics per 裁决表 v2: findings are WARN by default (exit 0);
 // --strict turns them into FAIL (exit 1). All paths parameterized; CRLF/BOM
@@ -9,10 +9,10 @@ import { UsageError, parseArgs, toPosix, templateText, projectNameFromAgents, PK
 
 const BOOL_FLAGS = ['strict', 'help'];
 
-const HELP = `specgate check — audit project docs against the AGENTS.md stage marker
+const HELP = `kaigong check — audit project docs against the AGENTS.md stage marker
 
 Usage:
-  specgate check [dir] [options]
+  kaigong check [dir] [options]
 
 Stage marker: the first "<!-- stage: X -->" comment in AGENTS.md.
 Allowed: S0 | S1 | S2 | S3 | exempt | frozen | merged:PNN (docs live with the
@@ -37,6 +37,12 @@ Governance assertions (all findings, like the stage checks above):
   stale     an AGENTS.md "<!-- template_version: N -->" older than the shipped
             template reports a stale finding with an update hint; your file is
             never edited (an AGENTS.md without the marker is not flagged).
+  kickoff+  source code present while docs/plans/ holds no actual gate doc ->
+            one kickoff blind-spot finding (stage S0-S3; heuristic source
+            extensions, node_modules/.git/docs/dist/build excluded)
+  stage     stage S0 plus a runnable entry point (package.json bin/main/
+            scripts.start, or Cargo.toml / pyproject.toml at the root) ->
+            advisory finding suggesting the move to S1
 
 Options:
   --strict                    Findings fail the run (exit 1). Default: WARN, exit 0.
@@ -56,10 +62,57 @@ Options:
 
 Exit codes: 0 = PASS / WARN / SKIP · 1 = FAIL (--strict with findings) · 2 = usage error.
 The five-doc model, stage signals, and each document's role: see AGENTS.md in
-the target project (created by "specgate init").`;
+the target project (created by "kaigong init").`;
 
 const STAGE_RE = /<!--\s*stage:\s*([A-Za-z0-9:.-]+)\s*-->/;
 const VALID_STAGE = /^(S[0-3]|exempt|frozen|merged:[A-Za-z0-9.-]+)$/;
+
+// AC-1 kickoff blind-spot heuristic: file extensions that say "source code"
+// (not docs, not config). Fixed list, lowercase compare.
+const CODE_EXTS = new Set(['.py', '.js', '.mjs', '.ts', '.jsx', '.tsx', '.go', '.rs', '.java', '.sh', '.html']);
+// Directories a source scan never enters: dependencies, repo metadata, the
+// docs tree itself, build output. 'docs' also covers the default --docs-dir.
+const CODE_SKIP_DIRS = new Set(['node_modules', '.git', 'docs', 'dist', 'build']);
+
+/** First source file under absDir as a posix relative path, or null.
+ * Recursive, read-only, symlink-ignoring; skips CODE_SKIP_DIRS at any depth. */
+function findSourceFile(absDir, relParts) {
+  let entries;
+  try { entries = readdirSync(absDir, { withFileTypes: true }); } catch { return null; }
+  for (const e of entries) {
+    if (e.isDirectory()) {
+      if (CODE_SKIP_DIRS.has(e.name)) continue;
+      const hit = findSourceFile(join(absDir, e.name), relParts.concat(e.name));
+      if (hit !== null) return hit;
+    } else if (e.isFile()) {
+      const dot = e.name.lastIndexOf('.');
+      if (dot !== -1 && CODE_EXTS.has(e.name.slice(dot).toLowerCase())) {
+        return relParts.concat(e.name).join('/');
+      }
+    }
+  }
+  return null;
+}
+
+/** A visible main-flow signal for the stage-S0 dead-water check (AC-2):
+ * package.json declaring bin / main / scripts.start, or a Cargo.toml /
+ * pyproject.toml at the project root. Returns a where-string, or null. */
+function mainflowSignal(dir, has) {
+  const pkgPath = join(dir, 'package.json');
+  if (existsSync(pkgPath)) {
+    try {
+      const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+      const bin = typeof pkg.bin === 'string' ? pkg.bin : (pkg.bin && typeof pkg.bin === 'object' ? Object.keys(pkg.bin)[0] : null);
+      if (typeof bin === 'string' && bin) return 'package.json — declares "bin" (' + bin + ')';
+      if (typeof pkg.main === 'string' && pkg.main) return 'package.json — declares "main" (' + pkg.main + ')';
+      const start = pkg.scripts && typeof pkg.scripts.start === 'string' ? pkg.scripts.start.trim() : '';
+      if (start) return 'package.json — declares "scripts.start" (' + start + ')';
+    } catch { /* unparsable package.json: the file markers below still count */ }
+  }
+  if (has('Cargo.toml')) return 'Cargo.toml — found at the project root';
+  if (has('pyproject.toml')) return 'pyproject.toml — found at the project root';
+  return null;
+}
 
 // A table row's State cell is the open-card marker only when the cell reads
 // exactly NC-OPEN (backticks tolerated). "NC-OPEN: soon" in a question cell
@@ -88,7 +141,7 @@ export function runCheck(argv) {
   argv = argv.map((a) => (a === '-h' ? '--help' : a));
   const { flags, positionals } = parseArgs(argv, BOOL_FLAGS);
   if (flags.help) { console.log(HELP); return 0; }
-  if (positionals.length > 1) throw new UsageError('unexpected extra argument: ' + positionals[1] + ' (usage: specgate check [dir] [options])');
+  if (positionals.length > 1) throw new UsageError('unexpected extra argument: ' + positionals[1] + ' (usage: kaigong check [dir] [options])');
   const dir = resolve(positionals[0] ?? '.');
   if (!existsSync(dir)) throw new UsageError('project directory not found: ' + dir);
   const dirArg = positionals[0];
@@ -109,7 +162,7 @@ export function runCheck(argv) {
   const backlogDirRel = flags['backlog-dir'] ?? 'backlog';
 
   const has = (rel) => existsSync(join(dir, rel));
-  const initCmd = (s) => 'specgate init' + (dirArg ? ' ' + dirArg : '') + ' --stage ' + s;
+  const initCmd = (s) => 'kaigong init' + (dirArg ? ' ' + dirArg : '') + ' --stage ' + s;
 
   const findings = [];
   const push = (title, where, expected, fix) => findings.push({ title, where, expected, fix });
@@ -226,6 +279,48 @@ export function runCheck(argv) {
     }
   }
 
+  // ---- assertion: kickoff blind spot — code with no gate doc (AC-1, P16) ----
+  // P16 adversarial rounds passed a check that only read docs: the checker
+  // never looked at the code side of the repo. Heuristic repair: source files
+  // present (by extension) while docs/plans/ holds no actual gate doc means
+  // coding is running straight past the kickoff gate. Template and example
+  // copies do not count as gate docs (same exclusion as the NC-OPEN scan).
+  let gateEntries = [];
+  try { gateEntries = readdirSync(join(dir, plansRel)); } catch { /* no plans dir: per-stage rules already cover it */ }
+  const isActualGateDoc = (fname) =>
+    fname.endsWith('.md') &&
+    (fname.startsWith('gate-') || fname.startsWith('开工门槛-')) &&
+    !fname.endsWith('.template.md') && !fname.endsWith('.example.md');
+  const actualGateDocs = gateEntries.filter(isActualGateDoc);
+  if (/^S[0-3]$/.test(stage ?? '')) {
+    const firstSource = findSourceFile(dir, []);
+    if (firstSource !== null && actualGateDocs.length === 0) {
+      push(
+        'Source code but no gate doc — kickoff blind spot (stage ' + stage + ')',
+        firstSource + ' — source file found; ' + toPosix(plansRel) + '/ holds no actual gate doc (gate-*.md / 开工门槛-*.md; template and example copies excluded)',
+        'one gate doc per coding batch in ' + toPosix(plansRel) + '/ before dispatch — the short spec that states what this batch does and does not do',
+        initCmd(stage) + '   # installs ' + toPosix(join(plansRel, 'gate-doc.template.md')) + '; copy it to ' + toPosix(join(plansRel, 'gate-<batch>_v1.md')) + ', fill it in, then rerun: kaigong check' + (dirArg ? ' ' + dirArg : '')
+      );
+    }
+  }
+
+  // ---- assertion: stage S0 with a runnable entry point (AC-2, P16) ----
+  // Dead-water S0: the repo already declares a runnable main flow while
+  // AGENTS.md still says S0. Advisory only — the owner decides the stage
+  // move; the check just refuses to stay silent about the signal. Stacks on
+  // the S0 ADR index advisory above; replaces nothing.
+  if (stage === 'S0') {
+    const signal = mainflowSignal(dir, has);
+    if (signal !== null) {
+      push(
+        'Stage S0 with a runnable entry point — consider S1 (advisory)',
+        signal,
+        'stage S1 once one command runs the main flow end to end — the marker in ' + toPosix(agentsRel) + ' is the single place stage lives',
+        initCmd('S1') + '   # installs the S1 docs (task board, architecture current state); then set "<!-- stage: S1 -->" in ' + toPosix(agentsRel) + ', rerun: kaigong check' + (dirArg ? ' ' + dirArg : '')
+      );
+    }
+  }
+
   // ---- assertion: template_version stale (A-09/F-01) ----
   // Compares the AGENTS.md header marker against the shipped template's.
   // Behind -> one finding with an update hint. Never edits anything. An
@@ -241,8 +336,8 @@ export function runCheck(argv) {
       push(
         'template_version stale — your ' + toPosix(agentsRel) + ' is behind the shipped template (' + mine + ' < ' + shipped + ')',
         toPosix(agentsRel) + ' — header "<!-- template_version: ' + mine + ' -->" vs shipped ' + shippedRel + ' "<!-- template_version: ' + shipped + ' -->"',
-        'the shipped template version marker "<!-- template_version: ' + shipped + ' -->" in your AGENTS.md (upgrades warn only — specgate never edits your file)',
-        'diff "' + toPosix(join(PKG_ROOT, ...(lang === 'zh' ? ['templates', 'zh'] : ['templates']), 'AGENTS.template.md')) + '" "' + toPosix(agentsRel) + '", merge by hand, bump the marker to ' + shipped + ', then rerun: specgate check' + (dirArg ? ' ' + dirArg : '')
+        'the shipped template version marker "<!-- template_version: ' + shipped + ' -->" in your AGENTS.md (upgrades warn only — kaigong never edits your file)',
+        'diff "' + toPosix(join(PKG_ROOT, ...(lang === 'zh' ? ['templates', 'zh'] : ['templates']), 'AGENTS.template.md')) + '" "' + toPosix(agentsRel) + '", merge by hand, bump the marker to ' + shipped + ', then rerun: kaigong check' + (dirArg ? ' ' + dirArg : '')
       );
     }
   }
@@ -254,15 +349,11 @@ export function runCheck(argv) {
   // naming NC-OPEN together with NC-RESOLVED is a state-enum definition, not
   // an open card; a row still holding <...>/{{...}} placeholders is an
   // unfilled template example. One finding per file, first line + card count.
-  let gateEntries = [];
-  try { gateEntries = readdirSync(join(dir, plansRel)); } catch { /* no plans dir: per-stage rules already cover it */ }
-  for (const fname of gateEntries.sort()) {
+  for (const fname of actualGateDocs.slice().sort()) {
     // Chinese-named gate docs (开工门槛-*.md, the zh template set) scan under
-    // the same rules as gate-*.md: same .template.md/.example.md exclusions,
-    // same exact-NC-OPEN card semantics below.
-    if (!fname.endsWith('.md')) continue;
-    if (!fname.startsWith('gate-') && !fname.startsWith('开工门槛-')) continue;
-    if (fname.endsWith('.template.md') || fname.endsWith('.example.md')) continue;
+    // the same rules as gate-*.md. actualGateDocs — hoisted for the AC-1
+    // blind-spot assertion above — applies that same filter (and the
+    // .template.md / .example.md exclusions) exactly once.
     let text;
     try { text = readFileSync(join(dir, plansRel, fname), 'utf8').replace(/\r\n/g, '\n'); } catch { continue; }
     const hitLines = openCardLines(text);
@@ -272,13 +363,13 @@ export function runCheck(argv) {
       hitLines.length + ' NC-OPEN decision card' + (hitLines.length === 1 ? '' : 's') + ' in ' + rel + ' — resolve before dispatch (kickoff)',
       rel + ':' + hitLines[0] + ' — open decision-ledger row(s) "NC-OPEN" on line(s) ' + hitLines.join(', '),
       'every card NC-RESOLVED or NC-N/A before coding dispatch, e.g. "| NC-1 | currency? | a | NC-RESOLVED: 1a — single currency; multi parked on the board |"',
-      'send the open cards to the owner as one numbered batch (solo mode: accept the recommended defaults), mark each NC-RESOLVED, then rerun: specgate check' + (dirArg ? ' ' + dirArg : '')
+      'send the open cards to the owner as one numbered batch (solo mode: accept the recommended defaults), mark each NC-RESOLVED, then rerun: kaigong check' + (dirArg ? ' ' + dirArg : '')
     );
   }
 
   // ---- report: every finding = where + expected + fix ----
   if (findings.length > 0) {
-    console.log('specgate check — ' + dir + (stage ? ' (stage ' + stage + ')' : ''));
+    console.log('kaigong check — ' + dir + (stage ? ' (stage ' + stage + ')' : ''));
     findings.forEach((f, i) => {
       console.log('');
       console.log('[' + (i + 1) + '/' + findings.length + '] ' + f.title);
