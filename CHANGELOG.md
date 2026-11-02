@@ -20,6 +20,48 @@ All notable changes to this project are documented here. The format follows
 
 ### Security
 
+## [0.2.0] - 2026-11-02
+
+Rename release: **specgate is now kaigong** (开工 — the kickoff). Same kit, same
+files, new name. The rename and everything else in this release came out of the
+P16 adversarial field test: the "teaching" worked (documents carry the system,
+new sessions and low-tier models learn it), but the "truncheon" did not exist —
+two adversarial rounds walked straight past the checker and it printed PASS.
+v0.2.0 fixes what that experiment measured, at the moment migration cost is at
+its lifetime minimum (no external users yet).
+
+### Changed
+
+- **Renamed to `kaigong`.** npm package `kaigong` (bare name; the old
+  `@smashupcn/specgate` is deprecated and points here), CLI bin `kaigong`,
+  repository `github.com/suyukun/kaigong`. Install with `npm i -g kaigong` or
+  try it with `npx kaigong`. Every user-visible string — help texts, findings,
+  template commands, README / INSTALL — now says kaigong.
+- **Compatibility kept on purpose:** the `.specgate-manifest.json` manifest
+  file name is unchanged, so the ten projects already onboarded keep a working
+  uninstall ledger; existing AGENTS.md files need no edit (the stale-template
+  comparison is version-based, not name-based).
+
+### Added
+
+- **check: kickoff blind-spot assertion.** When a repository holds source files
+  (heuristic extensions; `node_modules`/`.git`/`docs`/`dist`/`build` excluded)
+  while `docs/plans/` holds no actual gate doc (`gate-*.md` / `开工门槛-*.md`,
+  template and example copies excluded) and the stage is S0–S3, check now
+  reports one finding titled with **kickoff** — the exact hole the P16
+  adversarial rounds walked through (code shipped with no batch spec at all,
+  and the checker never looked at the code side).
+- **check: stage dead-water assertion (advisory).** Stage S0 plus a runnable
+  main-flow signal (`package.json` `bin`/`main`/`scripts.start`, or a
+  `Cargo.toml` / `pyproject.toml` at the root) now draws an advisory suggesting
+  the move to S1. Stacks on the existing S0 ADR-index advisory; replaces
+  nothing.
+- **Templates: minimal non-negotiables.** The zh/en AGENTS templates gained a
+  section for the moment a user asks to skip the process: the gate doc and the
+  check are the two things an agent must keep; everything else is negotiable —
+  and whatever gets skipped must be negotiated, never dropped by default.
+  Both template headers bump to `template_version: 2` (en/zh equal).
+
 ## [0.1.1] - 2026-10-28
 
 Dogfood release. After v0.1.0 shipped we put it to work onboarding our own
